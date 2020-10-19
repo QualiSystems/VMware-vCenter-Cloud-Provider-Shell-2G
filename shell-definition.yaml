@@ -1,0 +1,132 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+metadata:
+  template_name: VMware vCenter Cloud Provider Shell 2G
+  template_author: Quali
+  template_version: 1.0.0
+  template_icon: shell-icon.png
+
+description: >
+ Sample TOSCA based shell
+
+imports:
+  - cloudshell_standard: cloudshell_cloud_provider_standard_1_0_0.yaml
+
+node_types:
+ vendor.resource.VMware vCenter Cloud Provider 2G:
+    derived_from: cloudshell.nodes.CustomCloudProvider
+    capabilities:
+    
+      concurrent_command_capability:
+        type: cloudshell.capabilities.SupportConcurrentCommands
+        
+      auto_discovery_capability:
+        type: cloudshell.capabilities.AutoDiscovery
+        properties:        
+          enable_auto_discovery:
+            type: boolean
+            default: true
+          auto_discovery_description:
+            type: string
+            default: Describe the auto discovery
+          inventory_description:
+            type: string
+            default: Describe the resource shell template
+          hide_address:
+            type: string
+            default: false
+          User:
+            type: string
+          Password:
+            type: cloudshell.datatypes.Password
+          Default dvSwitch:
+            type: string
+          Holding Network:
+            type: string
+          VM Cluster:
+            type: string
+          VM Resource Pool:
+            type: string
+          VM Storage:
+            type: string
+          Saved Sandbox Storage:
+            type: string
+          Behavior during save:
+            type: string
+            default: "Remain Powered On"
+          VM Location:
+            type: string
+            default: "QualiSystems"
+          Shutdown Method:
+            type: string
+            default: "hard"
+          OVF Tool Path:
+            type: string
+            default: "C:\\Program Files (x86)\\VMware\\VMware Workstation\\OVFTool\\ovftool.exe"
+          Reserved Networks:
+            type: string
+          Execution Server Selector:
+            type: string
+          Promiscuous Mode:
+            type: boolean
+            default: true
+
+    properties:
+      User:
+        type: string
+      Password:
+        type: cloudshell.datatypes.Password
+      Default dvSwitch:
+        type: string
+        description: "The default vCenter dvSwitch that will be used when configuring VM connectivity. Should be under the Default Datacenter."
+      Holding Network:
+        type: string
+        description: "The default network that will be configured when disconnecting from another network. Should be under the Default Datacenter."
+      VM Cluster:
+        type: string
+        description: "The vCenter cluster or host that will be used when deploying a VM. Should be under the Default Datacenter."
+      VM Resource Pool:
+        type: string
+        description: "The vCenter Resource Pool in which the VM will be created. Should be under the defined VM Cluster (optional)."
+      VM Storage:
+        type: string
+        description: "The vCenter storage in which the VMs will be created. The storage can be either a datastore or a datastore cluster. For example: datastore1 (To use a specific datastore inside a cluster, specify the cluster name and the datastore name. For example: clustername/datastore1)"
+      Saved Sandbox Storage:
+        type: string
+        description: "The vCenter storage in which the content of saved sandboxes will be created. The storage can be either a datastore or a datastore cluster. For example: datastore1  or clustername/datastore1 (for datastore inside a cluster)"
+      Behavior during save:
+        type: string
+        description: "Determines the VM behavior when the sandbox is saved. If Power off is selected, and the VM was powered on before the save, then the VM will shut down for the duration of the save, and then be powered on at the end."
+        constraints:
+          - valid_values: ["Remain Powered On", "Power Off"]
+      VM Location:
+        type: string
+        description: "The full path to the folder within vCenter in which the VM will be created. (e.g vms/quali)"
+      Shutdown Method:
+        type: string
+        description: "The shutdown method that will be used when powering off the VM. Possible options are 'Hard' and 'Soft' shutdown."
+        constraints:
+          - valid_values: ["hard", "soft"]
+      OVF Tool Path:
+        type: string
+        description: "The path for the OVF tool installation. Use the same path for all execution servers."
+      Reserved Networks:
+        type: string
+        description: "Reserved networks separated by Semicolon(;), vNICs configured to those networks won't be used for VM connectivity."
+      Execution Server Selector:
+        type: string
+        description: "This attribute points to a pre-defined group of execution servers. Usually used for different sites or domains."
+      Promiscuous Mode:
+        type: boolean
+        description: "If enabled the port groups on the virtual switch will be configured to allow promiscuous mode."
+
+    artifacts:
+      icon:
+        file: shell-icon.png
+        type: tosca.artifacts.File
+      driver:
+        file: VMwarevCenterCloudProviderShell2GDriver.zip
+        type: tosca.artifacts.File
+      deployment:
+        file: Deployments.zip
+        type: tosca.artifacts.File

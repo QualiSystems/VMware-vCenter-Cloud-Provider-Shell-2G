@@ -1,0 +1,46 @@
+<Driver Description="" MainClass="driver.VMwarevCenterCloudProviderShell2GDriver" Name="VMwarevCenterCloudProviderShell2GDriver" Version="1.0.0" PythonVersion="3">
+    <Layout>
+        <Category Name="Deployment">
+            <Command Description="" DisplayName="Deploy From Template" EnableCancellation="true" Name="deploy_from_template" Tags="allow_unreserved" />
+            <Command Description="" DisplayName="Deploy Clone From VM" EnableCancellation="true" Name="deploy_clone_from_vm" Tags="allow_unreserved" />
+            <Command Description="" DisplayName="Deploy from Linked Clone" EnableCancellation="true" Name="deploy_from_linked_clone" Tags="allow_unreserved" />
+            <Command Description="" DisplayName="Deploy From Image" EnableCancellation="true" Name="deploy_from_image" Tags="allow_unreserved" />
+            <Command Description="" DisplayName="Deploy" EnableCancellation="true" Name="Deploy" Tags="allow_unreserved" />
+        </Category>
+        <Category Name="Connectivity">
+            <Command Description="" DisplayName="Refresh IP" EnableCancellation="true" Name="remote_refresh_ip" Tags="remote_connectivity,allow_shared" />
+            <Command Description="" DisplayName="Apply Connectivity Changes" Name="ApplyConnectivityChanges" Tags="allow_unreserved" />
+            <Command Description="" DisplayName="Disconnect All" Name="disconnect_all" Tags="allow_unreserved" />
+            <Command Description="" DisplayName="Disconnect" Name="disconnect" Tags="allow_unreserved" />
+        </Category>
+        <Category Name="Snapshot">
+            <Command Description="" DisplayName="Save Snapshot" Name="remote_save_snapshot" Tags="remote_connectivity,allow_unreserved">
+                <Parameters>
+                    <Parameter DefaultValue="" Description="Please enter the VM snapshot name, for example Snapshot1" DisplayName="Snapshot Name" Mandatory="True" Name="snapshot_name" Type="String" />
+                    <Parameter AllowedValues="Yes,No" DefaultValue="No" Description="Snapshot the virtual machine's memory" DisplayName="Save Memory" Mandatory="True" Name="save_memory" Type="Lookup" />
+                </Parameters>
+            </Command>
+            <Command Description="" DisplayName="Restore Snapshot" Name="remote_restore_snapshot" Tags="remote_connectivity,allow_unreserved">
+                <Parameters>
+                    <Parameter DefaultValue="" Description="Please enter the full path of the VM snapshot, for example Snapshot1/Snapshot2." DisplayName="Snapshot Name" Mandatory="True" Name="snapshot_name" Type="String" />
+                </Parameters>
+            </Command>
+            <Command Description="" DisplayName="Get Snapshots" Name="remote_get_snapshots" Tags="remote_connectivity,allow_unreserved" />
+            <Command Description="" DisplayName="Delete Saved Apps" EnableCancellation="true" Name="DeleteSavedApps" Tags="allow_unreserved">
+            </Command>
+        </Category>
+        <Category Name="Hidden Commands">
+            <Command Description="" DisplayName="Power Cycle" Name="PowerCycle" Tags="power" />
+            <Command Description="" DisplayName="Delete VM Only" Name="DeleteInstance" Tags="remote_app_management,allow_shared" />
+            <Command Description="" DisplayName="Get VM Uuid" Name="get_vm_uuid" Tags="allow_shared" />
+            <Command Description="" DisplayName="Orchestration Save" Name="orchestration_save" Tags="remote_connectivity,allow_unreserved" />
+            <Command Description="" DisplayName="Orchestration Restore" Name="orchestration_restore" Tags="remote_connectivity,allow_unreserved" />
+            <Command Description="" DisplayName="Get VmDetails" EnableCancellation="true" Name="GetVmDetails" Tags="allow_unreserved" />
+            <Command Description="" DisplayName="SaveApp" EnableCancellation="true" Name="SaveApp" Tags="allow_unreserved" />
+        </Category>
+        <Category Name="Power">
+            <Command Description="" DisplayName="Power On" Name="PowerOn" Tags="power" />
+            <Command Description="" DisplayName="Power Off" Name="PowerOff" Tags="power" />
+        </Category>
+    </Layout>
+</Driver>
