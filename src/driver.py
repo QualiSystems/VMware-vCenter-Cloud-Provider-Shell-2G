@@ -1,15 +1,17 @@
 from cloudshell.cp.core.cancellation_manager import CancellationContextManager
+from cloudshell.cp.core.reservation_info import ReservationInfo
 from cloudshell.cp.core.request_actions import DeployVMRequestActions, GetVMDetailsRequestActions, DeployedVMActions
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
 from cloudshell.shell.core.session.logging_session import LoggingSessionContext
-
 from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
 from cloudshell.cp.vcenter.api.client import VCenterAPIClient
 from cloudshell.cp.vcenter.flows.autoload import VCenterAutoloadFlow
+from cloudshell.cp.vcenter.flows.deploy_vm.vm_from_vm import VCenterDeployVMfromVMFlow
+from cloudshell.cp.vcenter.models import deploy_app
 
 
-class VMwarevCenterCloudProviderShell2GDriver (ResourceDriverInterface):
+class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
     def __init__(self):
         """
         ctor must be without arguments, it is created with reflection at run time
@@ -67,6 +69,33 @@ class VMwarevCenterCloudProviderShell2GDriver (ResourceDriverInterface):
             logger.info("Starting Deploy command...")
             logger.debug(f"Request: {request}")
             api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context=context,
+                                                                 api=api)
+
+            cancellation_manager = CancellationContextManager(cancellation_context)
+            reservation_info = ReservationInfo.from_resource_context(context)
+            vcenter_client = VCenterAPIClient(host=resource_config.address,
+                                              user=resource_config.user,
+                                              password=resource_config.password,
+                                              logger=logger)
+
+            for deploy_app_cls in (deploy_app.VMFromVMDeployApp,
+                                   deploy_app.VMFromTemplateDeployApp,
+                                   deploy_app.VMFromLinkedCloneDeployApp,
+                                   deploy_app.VMFromImageDeployApp):
+
+                DeployVMRequestActions.register_deployment_path(deploy_app_cls)
+
+            request_actions = DeployVMRequestActions.from_request(request=request, cs_api=api)
+
+            deploy_flow = VCenterDeployVMfromVMFlow(resource_config=resource_config,
+                                                    reservation_info=reservation_info,
+                                                    vcenter_client=vcenter_client,
+                                                    cs_api=api,
+                                                    cancellation_manager=cancellation_manager,
+                                                    logger=logger)
+
+            return deploy_flow.deploy(request_actions=request_actions)
 
     def PowerOn(self, context, ports):
         """Called when reserving a sandbox during setup, a call for each app in the sandbox can also be run manually by
