@@ -13,7 +13,7 @@ imports:
   - cloudshell_standard: cloudshell_cloud_provider_standard_1_0_0.yaml
 
 node_types:
-  vendor.resource.vCenter Clone VM From VM 2nd Gen:
+  vendor.resource.vCenter VM From VM 2G:
     derived_from: cloudshell.nodes.CustomDeploymentOption
     properties:
       vCenter VM:
@@ -89,7 +89,7 @@ node_types:
         file: shell-icon.png
         type: tosca.artifacts.File
 
-  vendor.resource.vCenter VM From Template 2nd Gen:
+  vendor.resource.vCenter VM From Template 2G:
     derived_from: cloudshell.nodes.CustomDeploymentOption
     properties:
       vCenter Template:
@@ -165,7 +165,7 @@ node_types:
         file: shell-icon.png
         type: tosca.artifacts.File
 
-  vendor.resource.vCenter Deploy VM From Linked Clone 2nd Gen:
+  vendor.resource.vCenter VM From Linked Clone 2G:
     derived_from: cloudshell.nodes.CustomDeploymentOption
     properties:
       vCenter VM:
@@ -247,7 +247,7 @@ node_types:
         file: shell-icon.png
         type: tosca.artifacts.File
 
-  vendor.resource.vCenter VM From Image 2nd Gen:
+  vendor.resource.vCenter VM From Image 2G:
     derived_from: cloudshell.nodes.CustomDeploymentOption
     properties:
       vCenter Image:

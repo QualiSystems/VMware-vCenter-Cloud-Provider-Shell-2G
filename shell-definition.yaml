@@ -39,6 +39,8 @@ node_types:
             type: string
           Password:
             type: cloudshell.datatypes.Password
+          Default Datacenter:
+            type: string
           Default dvSwitch:
             type: string
           Holding Network:
@@ -53,7 +55,7 @@ node_types:
             type: string
           Behavior during save:
             type: string
-            default: "Remain Powered On"
+            default: "Power Off"
           VM Location:
             type: string
             default: "QualiSystems"
@@ -76,6 +78,9 @@ node_types:
         type: string
       Password:
         type: cloudshell.datatypes.Password
+      Default Datacenter:
+        type: string
+        description: "The datacenter within the vCenter that will be used for VM deployment. All other settings of this vCenter resource should refer to entities associated with this datacenter."
       Default dvSwitch:
         type: string
         description: "The default vCenter dvSwitch that will be used when configuring VM connectivity. Should be under the Default Datacenter."
