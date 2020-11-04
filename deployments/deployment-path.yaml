@@ -84,6 +84,10 @@ node_types:
         description: "Timeout for waiting when obtaining IP address (in seconds)"
         default: 600
         tags: []
+      Customization Spec:
+        type: string
+        description: "Name of customization spec to use with the application deployment"
+        tags: [user_input]
     artifacts:
       icon:
         file: shell-icon.png
@@ -160,6 +164,10 @@ node_types:
         description: "Timeout for waiting when obtaining IP address (in seconds)"
         default: 600
         tags: []
+      Customization Spec:
+        type: string
+        description: "Name of customization spec to use with the application deployment"
+        tags: [user_input]
     artifacts:
       icon:
         file: shell-icon.png
@@ -242,6 +250,10 @@ node_types:
         description: "Timeout for waiting when obtaining IP address (in seconds)"
         default: 600
         tags: []
+      Customization Spec:
+        type: string
+        description: "Name of customization spec to use with the application deployment"
+        tags: [user_input]
     artifacts:
       icon:
         file: shell-icon.png
