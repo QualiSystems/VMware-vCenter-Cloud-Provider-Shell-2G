@@ -47,7 +47,7 @@ jobs:
 
 stages:
   - name: Check version
-    if: branch = master AND type = pull_request
+    if: branch = master__old_code AND type = pull_request
   - name: Test
   - name: Create GitHub release
-    if: branch = master AND type != pull_request
+    if: branch = master__old_code AND type != pull_request
