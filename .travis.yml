@@ -27,7 +27,7 @@ jobs:
         skip_cleanup: true
         draft: true
         api_key:
-          secure: "cwEhEgomckaNlvsp1NlCzn+MjPAprpA9Zxga3QnNtXPS/YL2fwU4gCq1t9sAZVGOW588IBrW+pkvX6HOn+pB0EgTGlscJDsV428HtIA18qdzblPvKLIRI7Ppbtw2FIXSvhiljCQVQUc7AIB0qngEVOvoVBDxsGtMRMYOXaGUfWb1Mc7L+nxzpqBCuTvYUIWyhx1vpghH2qCSBa3WSD45b8HQemIjZzbsf3xK9X9l27ItyxRXuhcidov2w3HlH+9h2fQ1pTOD25b04jkpLpV8kz/2cgWR7Mox4ySVuvoTCIL9frcZmtJcHdL2SiD4FesxcLL0HrnBhvZfa167MioT+vfD028CrvSO72YqJzVcA3eHuUEXysbFLqqyqgB50Lnk4aE6zzb64/Y8OJyTSY+gd9WnUBCgbYzXKBBZtGhdW+u4D5hb/7uQvBFXxQ17MEqo9ziLHwJI8qs7vzDnmQpwahHFZN4zBgj9K8s3cAGMfsyvtoVVT/ztAAxYn0ddG6XWqO6eAxtsum4YLQrOLOtDYWHRfPY0iuyUEjZ+EkQG5GeDsaB90UU16OCs4pNUVRV//abK3il+lMeeS9BMIQFNHYWxpnRpADsuQtNVkni4UlsdkNv/fl/E2bR3PFQvWzrmAH31CwR7zE/RdPC5ynKTGASWzXaQ4zu55G97JoHklRQ="
+          secure: "MyxVKJOKU67p6jfaGY2+chKHebIseVh6/9hiMfla+V7PaRp+B2M//WB1xEGi7scD7yYkFSXzeeslrMmIStaGCXVZ07TldPcSPrIeTk7Bgjf/9uGHkHnN+dskQTwGj0ILgrOpc88dTtF+IFj1qEnXJp/p9/rWmTjENVW1w0cZt2IqSaUWNX6fMmlixQh3reSGQwEmffzSOoSmvGvZ1XH71q7jPWuEmrVa6TALdZ9LmcQcz5ISG4WVJDmZ14NAtHWAGImTc9O1EHOvu9L9P7nVZyPGcJ5YBuF5U5TXK869mLZanc2mfpdjHfI6whx0VbEAZbCfmFQDEVy7l8ig81sjnQxRAkd7x/6PG4mtskqDSppo1cL1mBwTpWs/UENpFGWNCAkTfokUP3SAJjO+R6FmH3FGNqFdJ6GJ6S/2GhZ+T4EjRlMS4dOS66KHqNesFExlCShMYNr3AMTJRuRGkEXaL9THqqGGnsKzj7GWHQLE2aTvaCUXsoqEyCX00Xsk2m0QbLd8FGsGySC6wi1EVAdRBjnMTIplEqXcu1AMk2jRJu+NQqtIkmdA0zp3v4I8shInxTYV9xlYh2v1QzkuiO2OCjIrjBypXpqEmbCDRaG4mcbA4Vt08p669SRnIi04p/qbLN0E6O5qbs4MCDIf7hwdezBtaTRRxUl/gQ0UOEDv098="
         file_glob: true
         file: dist/*.zip
         name: VMware vCenter Cloud Provider Shell 2G $GIT_TAG
