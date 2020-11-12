@@ -1,0 +1,53 @@
+language: python
+python: 3.7
+jobs:
+  include:
+    - env: TOXENV=pre-commit
+      script: tox
+      install: pip install tox
+    - stage: Create GitHub release
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get -y install jq
+      install:
+        - pip install yq
+        - pip install tox
+      before_deploy:
+        - export AUTHOR_EMAIL="$(git log -1 $TRAVIS_COMMIT --pretty="%cE")"
+        - export AUTHOR_NAME="$(git log -1 $TRAVIS_COMMIT --pretty="%aN")"
+        - git config --local user.name $AUTHOR_NAME
+        - git config --local user.email $AUTHOR_EMAIL
+        - git tag $VERSION
+      script:
+        - tox
+        - export VERSION="$(yq -r .metadata.template_version shell-definition.yaml)"
+        - mv dist/dependencies.zip dist/cloudshell-vcenter-dependencies-package-$VERSION.zip
+      deploy:
+        provider: releases
+        skip_cleanup: true
+        draft: true
+        api_key:
+          secure: "cwEhEgomckaNlvsp1NlCzn+MjPAprpA9Zxga3QnNtXPS/YL2fwU4gCq1t9sAZVGOW588IBrW+pkvX6HOn+pB0EgTGlscJDsV428HtIA18qdzblPvKLIRI7Ppbtw2FIXSvhiljCQVQUc7AIB0qngEVOvoVBDxsGtMRMYOXaGUfWb1Mc7L+nxzpqBCuTvYUIWyhx1vpghH2qCSBa3WSD45b8HQemIjZzbsf3xK9X9l27ItyxRXuhcidov2w3HlH+9h2fQ1pTOD25b04jkpLpV8kz/2cgWR7Mox4ySVuvoTCIL9frcZmtJcHdL2SiD4FesxcLL0HrnBhvZfa167MioT+vfD028CrvSO72YqJzVcA3eHuUEXysbFLqqyqgB50Lnk4aE6zzb64/Y8OJyTSY+gd9WnUBCgbYzXKBBZtGhdW+u4D5hb/7uQvBFXxQ17MEqo9ziLHwJI8qs7vzDnmQpwahHFZN4zBgj9K8s3cAGMfsyvtoVVT/ztAAxYn0ddG6XWqO6eAxtsum4YLQrOLOtDYWHRfPY0iuyUEjZ+EkQG5GeDsaB90UU16OCs4pNUVRV//abK3il+lMeeS9BMIQFNHYWxpnRpADsuQtNVkni4UlsdkNv/fl/E2bR3PFQvWzrmAH31CwR7zE/RdPC5ynKTGASWzXaQ4zu55G97JoHklRQ="
+        file_glob: true
+        file: dist/*.zip
+        name: VMware vCenter Cloud Provider Shell 2G $GIT_TAG
+        target_commitish: master
+        on:
+          branch: master
+    - stage: Check version
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get -y install jq
+      install:
+        - pip install yq
+        - git clone https://github.com/$TRAVIS_REPO_SLUG.git $TRAVIS_REPO_SLUG
+        - cd $TRAVIS_REPO_SLUG
+        - git checkout -qf $TRAVIS_PULL_REQUEST_BRANCH
+      script: "! diff <(yq .metadata.template_version shell-definition.yaml) <(git show master:shell-definition.yaml > tmp.yaml && yq .metadata.template_version tmp.yaml)"
+
+stages:
+  - name: Check version
+    if: branch = master AND type = pull_request
+  - name: Test
+  - name: Create GitHub release
+    if: branch = master AND type != pull_request
