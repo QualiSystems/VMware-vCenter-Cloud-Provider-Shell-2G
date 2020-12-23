@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 metadata:
   template_name: VMware vCenter Cloud Provider Shell 2G
   template_author: Quali
-  template_version: 1.0.0
+  template_version: 2.0.0
   template_icon: shell-icon.png
 
 description: >
@@ -67,8 +67,6 @@ node_types:
             default: "C:\\Program Files (x86)\\VMware\\VMware Workstation\\OVFTool\\ovftool.exe"
           Reserved Networks:
             type: string
-          Execution Server Selector:
-            type: string
           Promiscuous Mode:
             type: boolean
             default: true
@@ -118,9 +116,6 @@ node_types:
       Reserved Networks:
         type: string
         description: "Reserved networks separated by Semicolon(;), vNICs configured to those networks won't be used for VM connectivity."
-      Execution Server Selector:
-        type: string
-        description: "This attribute points to a pre-defined group of execution servers. Usually used for different sites or domains."
       Promiscuous Mode:
         type: boolean
         description: "If enabled the port groups on the virtual switch will be configured to allow promiscuous mode."
