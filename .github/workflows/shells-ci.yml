@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+  release:
+    types: [published]
+
+jobs:
+  pre-commit:
+    name: Run pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install pip -U
+          pip install tox
+      - name: Run pre-commit
+        env:
+          TOXENV: pre-commit
+        run: tox
+  pack:
+    name: Pack the Shell
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install pip -U
+          pip install tox
+      - name: Build
+        env:
+          TOXENV: pack
+        run: tox
+  check-version:
+    name: Check version
+    # only for PRs in master
+    if: ${{ github.base_ref == 'master' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          sudo apt-get -y install jq
+          pip install yq
+      - name: Check version
+        run: |
+          git clone https://github.com/${{ github.repository }}.git ${{ github.repository }}
+          cd ${{ github.repository }}
+          git checkout -qf ${{ github.head_ref }}
+          ! diff <(yq .metadata.template_version shell-definition.yaml) <(git show master:shell-definition.yaml > tmp.yaml && yq .metadata.template_version tmp.yaml)
+  create-gh-release:
+    needs: [pre-commit, pack]
+    if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          sudo apt-get -y install jq
+          python -m pip install pip -U
+          pip install tox yq
+      - name: Pack and download dependencies
+        run: tox
+      - name: Set envs
+        run: |
+          version="$(yq -r .metadata.template_version shell-definition.yaml)"
+          repo_owner=${{ github.repository }}
+          index=`expr index "$repo_owner" /`
+          repo=${repo_owner:index}
+          echo "TAG=$version" >> $GITHUB_ENV
+          echo "REPO=$repo" >> $GITHUB_ENV
+      - name: Rename dependencies
+        run: |
+          mv dist/dependencies-win32.zip dist/cloudshell-$REPO-dependencies-win32-package-$TAG.zip
+          mv dist/dependencies-linux.zip dist/cloudshell-$REPO-dependencies-linux-package-$TAG.zip
+      - name: Create GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "dist/*"
+          draft: true
+          name: ${{ env.REPO }} ${{ env.TAG }}
+          tag: ${{ env.TAG }}
+          commit: master
