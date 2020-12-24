@@ -49,8 +49,8 @@ jobs:
         run: tox
   check-version:
     name: Check version
-    # only for PRs in master
-    if: ${{ github.base_ref == 'master' }}
+    # only for PRs in master__old_code
+    if: ${{ github.base_ref == 'master__old_code' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -68,10 +68,10 @@ jobs:
           git clone https://github.com/${{ github.repository }}.git ${{ github.repository }}
           cd ${{ github.repository }}
           git checkout -qf ${{ github.head_ref }}
-          ! diff <(yq .metadata.template_version shell-definition.yaml) <(git show master:shell-definition.yaml > tmp.yaml && yq .metadata.template_version tmp.yaml)
+          ! diff <(yq .metadata.template_version shell-definition.yaml) <(git show master__old_code:shell-definition.yaml > tmp.yaml && yq .metadata.template_version tmp.yaml)
   create-gh-release:
     needs: [pre-commit, pack]
-    if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    if: ${{ github.ref == 'refs/heads/master__old_code' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -107,4 +107,4 @@ jobs:
           draft: true
           name: ${{ env.REPO }} ${{ env.TAG }}
           tag: ${{ env.TAG }}
-          commit: master
+          commit: master__old_code
