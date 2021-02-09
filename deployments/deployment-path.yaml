@@ -88,6 +88,20 @@ node_types:
         type: string
         description: "Name of customization spec to use with the application deployment"
         tags: [user_input]
+      CPU:
+        type: string
+        description: "The number of CPUs to be configured on the VM"
+        tags: [user_input]
+      RAM:
+        type: string
+        description: "The amount of RAM (GB) to be configured on the VM"
+        tags: [user_input]
+      HHD:
+        type: string
+        description: "Allows to add/edit hard disk size by their number on the VM.
+         The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB).
+         Example: 'Hard Disk 1:100;Hard Disk 2:200'. Shortened format is also valid: '1:100;2:200'"
+        tags: [user_input]
     artifacts:
       icon:
         file: shell-icon.png
@@ -167,6 +181,20 @@ node_types:
       Customization Spec:
         type: string
         description: "Name of customization spec to use with the application deployment"
+        tags: [user_input]
+      CPU:
+        type: string
+        description: "The number of CPUs to be configured on the VM"
+        tags: [user_input]
+      RAM:
+        type: string
+        description: "The amount of RAM (GB) to be configured on the VM"
+        tags: [user_input]
+      HHD:
+        type: string
+        description: "Allows to add/edit hard disk size by their number on the VM.
+         The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB).
+         Example: 'Hard Disk 1:100;Hard Disk 2:200'. Shortened format is also valid: '1:100;2:200'"
         tags: [user_input]
     artifacts:
       icon:
@@ -253,6 +281,20 @@ node_types:
       Customization Spec:
         type: string
         description: "Name of customization spec to use with the application deployment"
+        tags: [user_input]
+      CPU:
+        type: string
+        description: "The number of CPUs to be configured on the VM"
+        tags: [user_input]
+      RAM:
+        type: string
+        description: "The amount of RAM (GB) to be configured on the VM"
+        tags: [user_input]
+      HHD:
+        type: string
+        description: "Allows to add/edit hard disk size by their number on the VM.
+         The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB).
+         Example: 'Hard Disk 1:100;Hard Disk 2:200'. Shortened format is also valid: '1:100;2:200'"
         tags: [user_input]
     artifacts:
       icon:
@@ -341,6 +383,20 @@ node_types:
         description: "Timeout for waiting when obtaining IP address (in seconds)"
         default: 600
         tags: []
+      CPU:
+        type: string
+        description: "The number of CPUs to be configured on the VM"
+        tags: [user_input]
+      RAM:
+        type: string
+        description: "The amount of RAM (GB) to be configured on the VM"
+        tags: [user_input]
+      HHD:
+        type: string
+        description: "Allows to add/edit hard disk size by their number on the VM.
+         The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB).
+         Example: 'Hard Disk 1:100;Hard Disk 2:200'. Shortened format is also valid: '1:100;2:200'"
+        tags: [user_input]
     artifacts:
       icon:
         file: shell-icon.png
