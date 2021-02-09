@@ -42,5 +42,14 @@
             <Command Description="" DisplayName="Power On" Name="PowerOn" Tags="power" />
             <Command Description="" DisplayName="Power Off" Name="PowerOff" Tags="power" />
         </Category>
+            <Category Name="Configuration">
+            <Command Description="" DisplayName="Reconfigure VM" Name="reconfigure_vm" Visibility="AdminOnly" Tags="remote_app_management,allow_unreserved">
+                <Parameters>
+                    <Parameter Description="" DisplayName="CPU" Name="cpu" Type="String" />
+                    <Parameter Description="" DisplayName="RAM" Name="ram" Type="String" />
+                    <Parameter Description="" DisplayName="HHD" Name="hhd" Type="String" />
+                </Parameters>
+            </Command>
+        </Category>
     </Layout>
 </Driver>
