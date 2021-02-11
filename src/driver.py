@@ -185,6 +185,9 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
     def get_vm_uuid(self, context, vm_name):
         return self.command_orchestrator.get_vm_uuid_by_name(context, vm_name)
 
+    def get_cluster_usage(self, context, datastore_name):
+        return self.command_orchestrator.get_cluster_usage(context, datastore_name)
+
     def GetVmDetails(self, context, cancellation_context, requests):
         return self.command_orchestrator.get_vm_details(
             context, cancellation_context, requests
