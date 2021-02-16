@@ -195,3 +195,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
 
     def reconfigure_vm(self, context, ports, cpu, ram, hhd):
         return self.command_orchestrator.reconfigure_vm(context, cpu, ram, hhd)
+
+    def get_vm_web_console(self, context, ports):
+        return self.command_orchestrator.get_vm_web_console(context)

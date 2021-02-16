@@ -55,6 +55,7 @@
                     <Parameter Description="Allows to add/edit hard disk size by their number on the VM. The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB). Example: 'Hard Disk 1:100;Hard Disk 2:200'. Shortened format is also valid: '1:100;2:200'" DisplayName="HHD" Name="hhd" Type="String" />
                 </Parameters>
             </Command>
+            <Command Description="" DisplayName="Get VM Web Console" Name="get_vm_web_console" Visibility="AdminOnly" Tags="remote_app_management,allow_unreserved" />
         </Category>
     </Layout>
 </Driver>
