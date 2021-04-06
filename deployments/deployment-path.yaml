@@ -10,7 +10,7 @@ description: >
   sample deployment path file
 
 imports:
-  - cloudshell_standard: cloudshell_cloud_provider_standard_1_0_0.yaml
+  - cloudshell_standard: cloudshell_cloud_provider_standard_1_0_1.yaml
 
 node_types:
   vendor.resource.vCenter VM From VM 2G:
@@ -87,6 +87,14 @@ node_types:
       Customization Spec:
         type: string
         description: "Name of customization spec to use with the application deployment"
+        tags: [user_input]
+      Hostname:
+        type: string
+        description: "The hostname to be configured on the VM"
+        tags: [user_input]
+      Private IP:
+        type: string
+        description: "The static IP to be configured on the VM"
         tags: [user_input]
       CPU:
         type: string
@@ -181,6 +189,14 @@ node_types:
       Customization Spec:
         type: string
         description: "Name of customization spec to use with the application deployment"
+        tags: [user_input]
+      Hostname:
+        type: string
+        description: "The hostname to be configured on the VM"
+        tags: [user_input]
+      Private IP:
+        type: string
+        description: "The static IP to be configured on the VM"
         tags: [user_input]
       CPU:
         type: string
@@ -281,6 +297,14 @@ node_types:
       Customization Spec:
         type: string
         description: "Name of customization spec to use with the application deployment"
+        tags: [user_input]
+      Hostname:
+        type: string
+        description: "The hostname to be configured on the VM"
+        tags: [user_input]
+      Private IP:
+        type: string
+        description: "The static IP to be configured on the VM"
         tags: [user_input]
       CPU:
         type: string

@@ -10,7 +10,7 @@ description: >
  Sample TOSCA based shell
 
 imports:
-  - cloudshell_standard: cloudshell_cloud_provider_standard_1_0_0.yaml
+  - cloudshell_standard: cloudshell_cloud_provider_standard_1_0_1.yaml
 
 node_types:
  vendor.resource.VMware vCenter Cloud Provider 2G:
