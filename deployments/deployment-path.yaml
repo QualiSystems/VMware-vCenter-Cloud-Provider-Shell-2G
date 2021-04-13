@@ -96,7 +96,7 @@ node_types:
         type: string
         description: "The amount of RAM (GB) to be configured on the VM"
         tags: [user_input]
-      HHD:
+      HDD:
         type: string
         description: "Allows to add/edit hard disk size by their number on the VM.
          The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB).
@@ -190,7 +190,7 @@ node_types:
         type: string
         description: "The amount of RAM (GB) to be configured on the VM"
         tags: [user_input]
-      HHD:
+      HDD:
         type: string
         description: "Allows to add/edit hard disk size by their number on the VM.
          The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB).
@@ -290,7 +290,7 @@ node_types:
         type: string
         description: "The amount of RAM (GB) to be configured on the VM"
         tags: [user_input]
-      HHD:
+      HDD:
         type: string
         description: "Allows to add/edit hard disk size by their number on the VM.
          The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB).
@@ -391,7 +391,7 @@ node_types:
         type: string
         description: "The amount of RAM (GB) to be configured on the VM"
         tags: [user_input]
-      HHD:
+      HDD:
         type: string
         description: "Allows to add/edit hard disk size by their number on the VM.
          The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB).
