@@ -60,7 +60,7 @@ The following table describes attributes that are unique to this shell and are n
 |:---|:---|:---|
 |User|String||
 |Password|Password||
-|Default dvSwitch|String|The default vCenter dvSwitch that will be used when configuring VM connectivity. Should be under the Default Datacenter|
+|Default dvSwitch|String|The default vCenter vSwitch or dvSwitch that will be used when configuring VM connectivity. Should be under the Default Datacenter|
 |Holding Network|String|The default network that will be configured when disconnecting from another network. Should be under the Default Datacenter|
 |VM Cluster|String|The vCenter cluster or host that will be used when deploying a VM. Should be under the Default Datacenter|
 |VM Resource Pool|String|The vCenter Resource Pool in which the VM will be created. Should be under the defined VM Cluster (optional)|
