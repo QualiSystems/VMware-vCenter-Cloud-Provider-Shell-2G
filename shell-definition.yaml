@@ -81,7 +81,7 @@ node_types:
         description: "The datacenter within the vCenter that will be used for VM deployment. All other settings of this vCenter resource should refer to entities associated with this datacenter."
       Default dvSwitch:
         type: string
-        description: "The default vCenter dvSwitch that will be used when configuring VM connectivity. Should be under the Default Datacenter."
+        description: "The default vCenter vSwitch or dvSwitch that will be used when configuring VM connectivity. Should be under the Default Datacenter."
       Holding Network:
         type: string
         description: "The default network that will be configured when disconnecting from another network. Should be under the Default Datacenter."
