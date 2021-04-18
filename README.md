@@ -183,6 +183,29 @@ In online mode, the execution server automatically downloads and extracts the ap
 **To update online Python dependencies:**
 * If there is a live instance of the shell's driver or script, terminate the shell’s instance, as explained [here](http://help.quali.com/Online%20Help/9.0/Portal/Content/CSP/MNG/Mng-Exctn-Srv-Exct.htm#Terminat). If an instance does not exist, the execution server will download the Python dependencies the next time a command of the driver or script runs.
 
+# Typical Workflows
+
+**Workflow 1 - _Create App Template_** 
+1. Log into CloudShell Portal as administrator.
+
+2. Click __Manage > Apps__ and add a new App template.
+
+3. Select the appropriate deployment type.<br><br>Note that this shell's deployment types all end with "2G" to indicate that they belong to a 2nd Gen shell. For example: "vCenter VM From Template 2G".
+
+4. Sepecify a __Name__ and click __Create__.
+
+6. In the __General__ tab, select the appropriate domain categories.<br><br>A domain category is a service category that is used to expose the App to specific CloudShell domains. By default, the __Applications__ category is associated to the Global domain. You can optionally create additional service categories for other domains or add the desired domains to the __Applications__ category. Service categories are managed in the __Manage>Categories>Service Categories__ page.
+
+7. Configure the App's __Deployment Path__ - select the cloud provider resource and fill in the settings.
+
+8. In the __Configuration Management__ tab, specify the configuration management script or Ansible playbook to run on the VM.
+
+9. In the __App Resource__ tab, optionally select the shell that defines the deployed App's behavior in CloudShell (e.g. which automation commands it includes). <br><br>You can also specify the deployed App's __Username__ and __Password__. CloudShell will set these credentials during the VM's deployment.
+
+10. You can add additional deployment paths by clicking the link in the bottom left corner of the dialog box.
+
+11. Click __Done__.
+
 # References
 To download and share integrations, see [Quali Community's Integrations](https://community.quali.com/integrations). 
 
