@@ -196,7 +196,7 @@ In online mode, the execution server automatically downloads and extracts the ap
 
 6. In the __General__ tab, select the appropriate domain categories.<br><br>A domain category is a service category that is used to expose the App to specific CloudShell domains. By default, the __Applications__ category is associated to the Global domain. You can optionally create additional service categories for other domains or add the desired domains to the __Applications__ category. Service categories are managed in the __Manage>Categories>Service Categories__ page.
 
-7. Configure the App's __Deployment Path__ - select the cloud provider resource and fill in the settings.
+7. Configure the App's __Deployment Path__ - select the cloud provider resource and fill in the settings.<br><br>See the attribute tooltips for details.
 
 8. In the __Configuration Management__ tab, specify the configuration management script or Ansible playbook to run on the VM.
 
