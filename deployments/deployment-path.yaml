@@ -86,15 +86,17 @@ node_types:
         tags: []
       Customization Spec:
         type: string
-        description: "Name of customization spec to use with the application deployment"
+        description: "(Only applies to Windows and Linux VMs) Name of the vSphere VM customization specification to apply on the deployed VM"
         tags: [user_input]
       Hostname:
         type: string
-        description: "The hostname to be configured on the VM"
+        description: "(Only applies to Windows and Linux VMs) The hostname to set on the VM. If Customization Spec is specified, the value specified in the Hostname parameter will be used.
+        Note: If Customization Spec is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page"
         tags: [user_input]
       Private IP:
         type: string
-        description: "The static IP to be configured on the VM"
+        description: "(Only applies to Windows and Linux VMs) The private static IP to set on the first vNIC of the VM. If Customization Spec is specified, the value specified in the Private IP parameter will be used.
+        Note: If Customization Spec is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page"
         tags: [user_input]
       CPU:
         type: string
@@ -188,15 +190,17 @@ node_types:
         tags: []
       Customization Spec:
         type: string
-        description: "Name of customization spec to use with the application deployment"
+        description: "(Only applies to Windows and Linux VMs) Name of the vSphere VM customization specification to apply on the deployed VM"
         tags: [user_input]
       Hostname:
         type: string
-        description: "The hostname to be configured on the VM"
+        description: "(Only applies to Windows and Linux VMs) The hostname to set on the VM. If Customization Spec is specified, the value specified in the Hostname parameter will be used.
+        Note: If Customization Spec is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page"
         tags: [user_input]
       Private IP:
         type: string
-        description: "The static IP to be configured on the VM"
+        description: "(Only applies to Windows and Linux VMs) The private static IP to set on the first vNIC of the VM. If Customization Spec is specified, the value specified in the Private IP parameter will be used.
+        Note: If Customization Spec is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page"
         tags: [user_input]
       CPU:
         type: string
@@ -296,15 +300,17 @@ node_types:
         tags: []
       Customization Spec:
         type: string
-        description: "Name of customization spec to use with the application deployment"
+        description: "(Only applies to Windows and Linux VMs) Name of the vSphere VM customization specification to apply on the deployed VM"
         tags: [user_input]
       Hostname:
         type: string
-        description: "The hostname to be configured on the VM"
+        description: "(Only applies to Windows and Linux VMs) The hostname to set on the VM. If Customization Spec is specified, the value specified in the Hostname parameter will be used.
+        Note: If Customization Spec is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page"
         tags: [user_input]
       Private IP:
         type: string
-        description: "The static IP to be configured on the VM"
+        description: "(Only applies to Windows and Linux VMs) The private static IP to set on the first vNIC of the VM. If Customization Spec is specified, the value specified in the Private IP parameter will be used.
+        Note: If Customization Spec is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page"
         tags: [user_input]
       CPU:
         type: string
