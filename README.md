@@ -39,7 +39,7 @@ For detailed information about the shell’s structure and attributes, see the [
 
 Release: VMware vCenter Cloud Provider Shell 2G
 
-▪ CloudShell version **9.3 and above**
+▪ CloudShell version **2020.2 and above**
 
 **Note:** If your CloudShell version does not support this shell, you should consider upgrading to a later version of CloudShell or contact customer support. 
 
