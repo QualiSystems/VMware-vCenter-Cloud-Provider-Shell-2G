@@ -2,9 +2,9 @@
 
 # **VMware vCenter Cloud Provider Shell 2G**
 
-Release date: November 2020
+Release date: May 2021
 
-`Shell version: 1.0.0`
+`Shell version: 3.1.2`
 
 `Document version: 1.0`
 
@@ -31,7 +31,7 @@ VMware vCenter Cloud Provider Shell 2G provides you with apps deployment and man
 For more information on the device, see the vendor's official product documentation.
 
 ### Standard version
-VMware vCenter Cloud Provider Shell 2G is based on the Cloud Provider Standard version **1.0.0**.
+VMware vCenter Cloud Provider Shell 2G is based on the Cloud Provider Standard version **1.1.0**.
 
 For detailed information about the shell’s structure and attributes, see the [Cloud Provider Standard](https://github.com/QualiSystems/cloudshell-standards/blob/master/Documentation/cloud_provider_standard.md) in GitHub.
 
@@ -41,7 +41,9 @@ Release: VMware vCenter Cloud Provider Shell 2G
 
 ▪ CloudShell version **2020.2 and above**
 
-**Note:** If your CloudShell version does not support this shell, you should consider upgrading to a later version of CloudShell or contact customer support. 
+**Note:** **Save/Restore Sandbox** support for vCenter Shell 2G is available in Clousdhsell **2021.1 P1 and above**.
+
+**Note:** If your CloudShell version does not support this shell, you should consider upgrading to a later version of CloudShell or contact customer support.
 
 ### Data Model
 
