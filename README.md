@@ -228,19 +228,19 @@ __To rename the HHD attribute:__
 4. In the SQLQuery window, paste the following requests:
 
 ```
-update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From VM 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From VM 2G.HDD');
+update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From VM 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From VM 2G.HHD');
 ```
 
 ```
-update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Template 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Template 2G.HDD');
+update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Template 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Template 2G.HHD');
 ```
 
 ```
-update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Image 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Image 2G.HDD');
+update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Image 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Image 2G.HHD');
 ```
 
 ```
-update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Linked Clone 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Linked Clone 2G.HDD');
+update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Linked Clone 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Linked Clone 2G.HHD');
 ```
 
    For example:
