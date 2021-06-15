@@ -41,9 +41,9 @@ Release: VMware vCenter Cloud Provider Shell 2G
 
 ▪ CloudShell version **2020.2 and above**
 
-**Note:** **Save/Restore Sandbox** support for vCenter Shell 2G is available in Clousdhsell **2021.1 P1 and above**.
-
-**Note:** If your CloudShell version does not support this shell, you should consider upgrading to a later version of CloudShell or contact customer support.
+**Notes:** 
+* **Save/Restore Sandbox** support for vCenter Shell 2G is available in Clousdhsell **2021.1 P1 and above**.
+* If your CloudShell version does not support this shell, you should consider upgrading to a later version of CloudShell or contact customer support.
 
 ### Data Model
 
@@ -187,7 +187,7 @@ In online mode, the execution server automatically downloads and extracts the ap
 
 # Typical Workflows
 
-**Workflow 1 - _Create App Template_** 
+## **Workflow 1 - _Create App Template_** 
 1. Log into CloudShell Portal as administrator.
 
 2. Click __Manage > Apps__ and add a new App template.
@@ -198,7 +198,8 @@ In online mode, the execution server automatically downloads and extracts the ap
 
 6. In the __General__ tab, select the appropriate domain categories.<br><br>A domain category is a service category that is used to expose the App to specific CloudShell domains. By default, the __Applications__ category is associated to the Global domain. You can optionally create additional service categories for other domains or add the desired domains to the __Applications__ category. Service categories are managed in the __Manage>Categories>Service Categories__ page.
 
-7. Configure the App's __Deployment Path__ - select the cloud provider resource and fill in the settings.<br><br>See the attribute tooltips for details.
+7. Configure the App's __Deployment Path__ - select the cloud provider resource and fill in the settings. See the attribute tooltips for details.
+<br><br>__Note:__ In vCenter 2G Shell versions 2.0.0 and 2.2.0, the HDD attribute in the App's deployment types was incorrectly named HHD. Upgrading to a later version will not remove the attribute, so if you're using or have used one of these versions in CloudShell, please make sure to fix this issue, as explained in the Renaming HHD attribute to HDD section.
 
 8. In the __Configuration Management__ tab, specify the configuration management script or Ansible playbook to run on the VM.
 
@@ -207,6 +208,50 @@ In online mode, the execution server automatically downloads and extracts the ap
 10. You can add additional deployment paths by clicking the link in the bottom left corner of the dialog box.
 
 11. Click __Done__.
+
+## Renaming HHD attribute to HDD
+
+When using vCenter 2G Shell version 2.0.0 and 2.2.0, the App deployment types include an attribute that is incorrectly named "HHD" instead of "HDD". The below procedure explains how to fix this issue, which is done in CloudShell’s SQL Server’s _Quali_ database.
+  ![Image][3]
+
+__To rename the HHD attribute:__
+
+1. On CloudShell’s SQL Server machine (usually hosted on the Quali Server machine), open SQL Server Management Studio.
+![Image][4]
+
+2. Connect to database.
+<br>![Image][5]
+
+3. Navigate to __Databases > Quali__. Right-click and select __New Query__.
+![Image][6]
+
+4. In the SQLQuery window, paste the following requests:
+
+```
+update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From VM 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From VM 2G.HDD');
+```
+
+```
+update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Template 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Template 2G.HDD');
+```
+
+```
+update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Image 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Image 2G.HDD');
+```
+
+```
+update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Linked Clone 2G.HDD' where (Name = 'VMware vCenter Cloud Provider 2G.vCenter VM From Linked Clone 2G.HDD');
+```
+
+   For example:
+   <br>![Image][7]
+
+5. Click __Execute__.
+<br>The following output should be displayed:
+![Image][8]
+
+6. To verify, go to CloudShell Portal’s __Manage>Apps__ page. Open an App template that uses a vCenter 2G Shell resource. Make sure the vCenter 2G deployment types include the __HDD__ attribute:
+![Image][9]
 
 # References
 To download and share integrations, see [Quali Community's Integrations](https://community.quali.com/integrations). 
@@ -226,3 +271,10 @@ For release updates, see the shell's [GitHub releases page](https://github.com/Q
 
 [1]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/cloudshell_logo.png
 [2]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/create_a_resource_device.png
+[3]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/vCenter%20App%20HHD.png
+[4]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/SQL%20Studio%20Link.png
+[5]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/SQL%20Connect%20database.jpg
+[6]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/SQL%20New%20Query.png
+[7]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/SQL%20Request.png
+[8]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/SQL%20Result.png
+[9]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/vCenter%20App%20HDD.png
