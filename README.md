@@ -4,7 +4,7 @@
 
 Release date: May 2021
 
-`Shell version: 3.1.2`
+`Shell version: 3.2.0`
 
 `Document version: 1.0`
 
@@ -188,26 +188,52 @@ In online mode, the execution server automatically downloads and extracts the ap
 # Typical Workflows
 
 ## **Workflow 1 - _Create App Template_** 
-1. Log into CloudShell Portal as administrator.
+  1. Log into CloudShell Portal as administrator.
 
-2. Click __Manage > Apps__ and add a new App template.
+  2. Click __Manage > Apps__ and add a new App template.
 
-3. Select the appropriate deployment type.<br><br>Note that this shell's deployment types all end with "2G" to indicate that they belong to a 2nd Gen shell. For example: "vCenter VM From Template 2G".
+  3. Select the appropriate deployment type.<br><br>Note that this shell's deployment types all end with "2G" to indicate that they belong to a 2nd Gen shell. For example: "vCenter VM From Template 2G".
 
-4. Sepecify a __Name__ and click __Create__.
+  4. Specify a __Name__ and click __Create__.
 
-6. In the __General__ tab, select the appropriate domain categories.<br><br>A domain category is a service category that is used to expose the App to specific CloudShell domains. By default, the __Applications__ category is associated to the Global domain. You can optionally create additional service categories for other domains or add the desired domains to the __Applications__ category. Service categories are managed in the __Manage>Categories>Service Categories__ page.
+  6. In the __General__ tab, select the appropriate domain categories.<br><br>A domain category is a service category that is used to expose the App to specific CloudShell domains. By default, the __Applications__ category is associated to the Global domain. You can optionally create additional service categories for other domains or add the desired domains to the __Applications__ category. Service categories are managed in the __Manage>Categories>Service Categories__ page.
 
-7. Configure the App's __Deployment Path__ - select the cloud provider resource and fill in the settings. See the attribute tooltips for details.
-<br><br>__Note:__ In vCenter 2G Shell versions 2.0.0 and 2.2.0, the HDD attribute in the App's deployment types was incorrectly named HHD. Upgrading to a later version will not remove the attribute, so if you're using or have used one of these versions in CloudShell, please make sure to fix this issue, as explained in the Renaming HHD attribute to HDD section.
+  7. In the App's __Deployment Path__ tab, enter the following attributes:
+      - **For vCenter VM From Template 2G deployment type:**
+          - **vCenter Template** - Path to the vCenter template to use in the virtual machine's creation. Path is relative to the datacenter and must include the template name, for example: *My-Templates/Template1*
+      - **For vCenter VM From VM 2G deployment type:**
+          - **vCenter VM** - Full path to the VM that will be used to clone a new VM, relative to the datacenter. For example: *My-Folder/My-VM*
+      - **For vCenter VM From Linked Clone 2G deployment type:**
+          - **vCenter VM** - Full path to the VM containing the snapshot for linked clones that will be used to clone a new VM, relative to the datacenter. For example: *My-Folder/My-VM*
+          - **vCenter Snapshot** - Full path to the virtual machine snapshot that will be used to clone a new VM. This snapshot should be associated with the VM defined in the vCenter VM input. For example Snapshot1/Snapshot2.
+      - **For vCenter VM From Image 2G deployment type:**
+          - **vCenter Image** - Full path to the vCenter OVF image file, relative to the datacenter. For example: My-OVF-Images/Image.ovf
+             - Path must be accessible to all execution servers. OVF tool must be installed on all execution servers.
+          - **vCenter Image Arguments** - (Optional) vCenter-specific arguments to use when deploying the virtual machine.
+<br>Example for OVF:
+<br>```--allowExtraConfig --prop:Hostname=ASAvtest --prop:HARole=Standalone --prop:SSHEnable=True --prop:DHCP=True --net:Management0-0='Office LAN 41' --net:GigabitEthernet0-0='VLAN_access_101'```
 
-8. In the __Configuration Management__ tab, specify the configuration management script or Ansible playbook to run on the VM.
+      - Common attributes:
+          - **Cloud Provider** - Cloud provider resource to use.
+          - **Customization Spec** - Name of the vSphere VM Customization Specification to apply to the App's VM.
+          - **Hostname** - (Only applies to Windows and Linux VMs) The hostname to set on the VM. 
+             - If **Customization Spec** is specified, the value specified in the **Hostname** attribute will be used. 
+             - If **Customization Spec** is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page.
+          - **Private IP** - (Only applies to Windows and Linux VMs) The private static IP to set on the first vNIC of the VM. If there's a default gateway, specify it after the private IP. For example: "192.168.4.124/80.114.1.87" where 80.114.1.87 is the default gateway
+             - If **Customization Spec** is specified, the value specified in the **Private IP** attribute will be used. 
+             - If **Customization Spec** is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a **Password** in the App resource page.
+          - **CPU** - Number of CPU core s to configure on the VM.
+          - **RAM** - Amount of RAM (GB) to configure on the VM.
+          - **HDD** - Allows to add/edit hard disk size to the VM. The syntax is semi-colon separated disk pairs 'Hard Disk Label: Disk Size (GB)'. For example: 'Hard Disk 1:100;Hard Disk 2:200'. Short-hand format is also valid: '1:100;2:200'.
+        <br>__Note:__ In vCenter 2G Shell versions 2.0.0 and 2.2.0, the HDD attribute in the App's deployment types was incorrectly named HHD. Upgrading to a later version will not remove the attribute, so if you're using or have used one of these versions in CloudShell, please make sure to fix this issue, as explained in the Renaming HHD attribute to HDD section.
 
-9. In the __App Resource__ tab, optionally select the shell that defines the deployed App's behavior in CloudShell (e.g. which automation commands it includes). <br><br>You can also specify the deployed App's __Username__ and __Password__. CloudShell will set these credentials during the VM's deployment.
+  8. In the __Configuration Management__ tab, specify the configuration management script or Ansible playbook to run on the VM.
 
-10. You can add additional deployment paths by clicking the link in the bottom left corner of the dialog box.
+  9. In the __App Resource__ tab, optionally select the shell that defines the deployed App's behavior in CloudShell (e.g. which automation commands it includes). <br><br>You can also specify the deployed App's __Username__ and __Password__. CloudShell will set these credentials during the VM's deployment.
 
-11. Click __Done__.
+  10. You can add additional deployment paths by clicking the link in the bottom left corner of the dialog box.
+
+  11. Click __Done__.
 
 ## Renaming HHD attribute to HDD
 
