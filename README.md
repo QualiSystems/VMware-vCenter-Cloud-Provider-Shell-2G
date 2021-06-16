@@ -219,7 +219,9 @@ In online mode, the execution server automatically downloads and extracts the ap
           - **Hostname** - (Only applies to Windows and Linux VMs) The hostname to set on the VM. 
              - If **Customization Spec** is specified, the value specified in the **Hostname** attribute will be used. 
              - If **Customization Spec** is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page.
-          - **Private IP** - (Only applies to Windows and Linux VMs) The private static IP to set on the first vNIC of the VM. If there's a default gateway, specify it after the private IP. For example: "192.168.4.124/80.114.1.87" where 80.114.1.87 is the default gateway
+          - **Private IP** - (Only applies to Windows and Linux VMs) The private static IP to set on the first vNIC of the VM. If there's a default gateway, specify it after the private IP. For example: "192.168.4.124:80.114.1.87" where 80.114.1.87 is the default gateway
+             - If there is no gateway, the .1 IP of the same subnet will be used as the gateway. So, for private IP "192.168.4.124", gateway "192.168.4.1" will be used. 
+             - It is also possible to provide a subnet mask here. For example: "192.168.4.124/24:80.114.1.87"
              - If **Customization Spec** is specified, the value specified in the **Private IP** attribute will be used. 
              - If **Customization Spec** is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a **Password** in the App resource page.
           - **CPU** - Number of CPU core s to configure on the VM.
