@@ -31,7 +31,7 @@ node_types:
             default: Describe the auto discovery
           inventory_description:
             type: string
-            default: Describe the resource shell template
+            default: vCenter template will create a vCenter resource in CloudShell. Once the vCenter is modeled correctly in CloudShell it will be possible to deploy Apps on this vCenter.
           hide_address:
             type: string
             default: false
