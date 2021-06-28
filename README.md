@@ -190,7 +190,7 @@ In online mode, the execution server automatically downloads and extracts the ap
 
 # Typical Workflows
 
-## **Workflow 1 - _Create App Template_** 
+## **Workflow 1 - Create App Template** 
   1. Log into CloudShell Portal as administrator.
 
   2. Click __Manage > Apps__ and add a new App template.
@@ -232,7 +232,7 @@ __Common attributes:__
 
   11. Click __Done__.
 
-## Renaming HHD attribute to HDD
+## Workflow 2 - Rename HHD attribute to HDD**
 
 When using vCenter 2G Shell version 2.0.0 and 2.2.0, the App deployment types include an attribute that is incorrectly named "HHD" instead of "HDD". The below procedure explains how to fix this issue, which is done in CloudShell’s SQL Server’s _Quali_ database.
   ![Image][3]
