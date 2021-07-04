@@ -26,7 +26,8 @@ A shell integrates a device model, application or other technology with CloudShe
 CloudShell Cloud Providers shells provide L2 or L3 connectivity between resources and/or Apps.
 
 ### VMware vCenter Cloud Provider Shell 2G
-VMware vCenter Cloud Provider Shell 2G provides you with apps deployment and management capabilities. 
+VMware vCenter Cloud Provider Shell 2G provides you with app deployment and management capabilities. 
+These include support for Python 3, vCenter 7 and VM Customization Specifications, standard vSwitch App connectivity, ability to connect vCenter Apps to existing port groups, ability to scale up deployed Apps in an active sandbox and more.
 
 For more information on the device, see the vendor's official product documentation.
 
@@ -42,7 +43,7 @@ Release: VMware vCenter Cloud Provider Shell 2G
 ▪ CloudShell version **2020.2 and above**
 
 **Notes:** 
-* **Save/Restore Sandbox** support for vCenter Shell 2G is available in Clousdhsell **2021.1 P1 and above**.
+* **Save/Restore Sandbox** support for vCenter Shell 2G is available in ClousdShell **2021.1 P1 and above**.
 * If your CloudShell version does not support this shell, you should consider upgrading to a later version of CloudShell or contact customer support.
 
 ### Data Model
