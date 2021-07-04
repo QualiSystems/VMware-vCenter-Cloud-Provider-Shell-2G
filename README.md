@@ -27,7 +27,7 @@ CloudShell Cloud Providers shells provide L2 or L3 connectivity between resource
 
 ### VMware vCenter Cloud Provider Shell 2G
 VMware vCenter Cloud Provider Shell 2G provides you with app deployment and management capabilities. 
-These include support for Python 3, vCenter 7 and VM Customization Specifications, standard vSwitch App connectivity, ability to connect vCenter Apps to existing port groups, ability to scale up deployed Apps in an active sandbox and more.
+These include support for Python 3, vCenter 7 and VM Customization Specifications, standard vSwitch App connectivity, ability to connect vCenter Apps to existing port groups, ability to scale up deployed Apps in an active sandbox and more. For details, see the [Key online help improvements](https://help.quali.com/Online%20Help/2021.2/portal/Content/CSP/CSP-Versn-Hstry.htm#Key) section in the 2021.2 online help. 
 
 For more information on the device, see the vendor's official product documentation.
 
