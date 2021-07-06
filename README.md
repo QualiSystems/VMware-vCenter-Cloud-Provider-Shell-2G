@@ -4,7 +4,7 @@
 
 Release date: May 2021
 
-`Shell version: 3.2.0`
+`Shell version: 3.3.0`
 
 `Document version: 1.0`
 
@@ -191,49 +191,7 @@ In online mode, the execution server automatically downloads and extracts the ap
 
 # Typical Workflows
 
-## **Workflow 1 - Create App Template** 
-  1. Log into CloudShell Portal as administrator.
-
-  2. Click __Manage > Apps__ and add a new App template.
-
-  3. Select the appropriate deployment type.<br><br>Note that this shell's deployment types all end with "2G" to indicate that they belong to a 2nd Gen shell. For example: "vCenter VM From Template 2G".
-
-  4. Specify a __Name__ and click __Create__.
-
-  6. In the __General__ tab, select the appropriate domain categories.<br><br>A domain category is a service category that is used to expose the App to specific CloudShell domains. By default, the __Applications__ category is associated to the Global domain. You can optionally create additional service categories for other domains or add the desired domains to the __Applications__ category. Service categories are managed in the __Manage>Categories>Service Categories__ page.
-
-  7. In the App's __Deployment Path__ tab, enter the following attributes:
-  
-__Deployment type-specific attributes:__
-
-|File name|Description|
-|:---|:---|
-|vCenter Template|Path to the vCenter template to use in the virtual machine's creation. Path is relative to the datacenter and must include the template name, for example: *My-Templates/Template1*|
-|vCenter VM|Full path to the VM (or VM containing the snapshot for linked clones) that will be used to clone a new VM, relative to the datacenter. For example: *My-Folder/My-VM*|
-|vCenter Snapshot|Full path to the virtual machine snapshot that will be used to clone a new VM. This snapshot should be associated with the VM defined in the vCenter VM input. For example: *Snapshot1/Snapshot2*|
-|vCenter Image|Full path to the vCenter OVF image file, relative to the datacenter (for example: *My-OVF-Images/Image.ovf*). Path must be accessible to all execution servers. OVF tool must be installed on all execution servers.|
-|vCenter Image Arguments|(Optional) vCenter-specific arguments to use when deploying the virtual machine. Example for OVF: ```--allowExtraConfig --prop:Hostname=ASAvtest --prop:HARole=Standalone --prop:SSHEnable=True --prop:DHCP=True --net:Management0-0='Office LAN 41' --net:GigabitEthernet0-0='VLAN_access_101'```|
-
-__Common attributes:__
-
-|File name|Description|
-|:---|:---|
-|Cloud Provider|Cloud provider resource to use|
-|Customization Spec|Name of the vSphere VM Customization Specification to apply to the App's VM. <br>**Notes:** If **Customization Spec** is specified, the value specified in the **Hostname** attribute will be used. If **Customization Spec** is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page.|
-|Private IP|(Only applies to Windows and Linux VMs) The private static IP to set on the first vNIC of the VM. If there's a default gateway, specify it after the private IP. For example: "192.168.4.124:80.114.1.87" where 80.114.1.87 is the default gateway<br>**Notes**:<br>  - If there is no gateway, the .1 IP of the same subnet will be used as the gateway. So, for private IP "192.168.4.124", gateway "192.168.4.1" will be used. <br>  - It is also possible to provide a subnet mask here. For example: "192.168.4.124/24:80.114.1.87"<br>  - If **Customization Spec** is specified, the value specified in the **Private IP** attribute will be used.<br>  - If **Customization Spec** is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a **Password** in the App resource page.|
-|CPU|Number of CPU core s to configure on the VM|
-|RAM|Amount of RAM (GB) to configure on the VM|
-|HDD|Allows to add/edit hard disk size to the VM. The syntax is semi-colon separated disk pairs 'Hard Disk Label: Disk Size (GB)'. For example: 'Hard Disk 1:100;Hard Disk 2:200'. Short-hand format is also valid: '1:100;2:200'.<br>__Note:__ In vCenter 2G Shell versions 2.0.0 and 2.2.0, the HDD attribute in the App's deployment types was incorrectly named HHD. Upgrading to a later version will not remove the attribute, so if you're using or have used one of these versions in CloudShell, please make sure to fix this issue, as explained in the Renaming HHD attribute to HDD section.|
-
-  8. In the __Configuration Management__ tab, specify the configuration management script or Ansible playbook to run on the VM.
-
-  9. In the __App Resource__ tab, optionally select the shell that defines the deployed App's behavior in CloudShell (e.g. which automation commands it includes). <br><br>You can also specify the deployed App's __Username__ and __Password__. CloudShell will set these credentials during the VM's deployment.
-
-  10. You can add additional deployment paths by clicking the link in the bottom left corner of the dialog box.
-
-  11. Click __Done__.
-
-## Workflow 2 - Rename HHD attribute to HDD
+## **Workflow 1 - Rename HHD attribute to HDD** 
 
 When using vCenter 2G Shell version 2.0.0 and 2.2.0, the App deployment types include an attribute that is incorrectly named "HHD" instead of "HDD". The below procedure explains how to fix this issue, which is done in CloudShell’s SQL Server’s _Quali_ database.
   ![Image][3]
@@ -276,6 +234,25 @@ update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM Fro
 
 6. To verify, go to CloudShell Portal’s __Manage>Apps__ page. Open an App template that uses a vCenter 2G Shell resource. Make sure the vCenter 2G deployment types include the __HDD__ attribute:
 ![Image][9]
+
+## Workflow 2 - Connect vCenter Apps to an existing VLAN port group
+Using the vCenter 2nd Gen shell, it is possible to connect an App or deployed App to an existing port group. This enables you to connect deployed Apps in different sandboxes and also to connect Apps deployed in a sandbox to static VMs on the vCenter server.
+
+__Note__: This capability is supported only for vCenter Apps and applies to port groups created on the datacenter defined on the vCenter cloud provider resource.
+For illustration purposes, the below procedure assumes you want to connect an App to port group "QS_vSwitch1_VLAN_100_Access".
+
+__To connect an App to an existing port group:__
+1. Download the _vCenter.VLAN.Port.Group.zip_ file from the vCenter 2G shell's Integrations [page](https://community.quali.com/repos/5386/vmware-vcenter-cloud-provider-shell-2g).
+2. Import the ZIP file into CloudShell Portal.
+3. Open the blueprint or sandbox. 
+4. From the __App / Service__ pane, drag the new __vCenter VLAN Port Group__ service into the diagram.
+5. Set the service's details:
+   - __Port Group Name__: Full port group name. For example: "QS_vSwitch1_VLAN_100_Access".
+   - __VLAN ID__: Port group's VLAN ID. For example: "100".
+6. Click __Add__.
+7. Create connection requirements between the vCenter Apps and the service.
+8. Deploy the connection(s), as appropriate. 
+9. <br>The connection is created like with any other VLAN service. This includes by deploying the App, connecting the purple Connector line if the App is already deployed, and reserving the blueprint.
 
 # References
 To download and share integrations, see [Quali Community's Integrations](https://community.quali.com/integrations). 
