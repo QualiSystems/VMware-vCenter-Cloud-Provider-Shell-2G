@@ -325,7 +325,7 @@ node_types:
         description: "Allows to add/edit hard disk size by their number on the VM.
          The syntax is comma-separated disk pairs Hard Disk Label: Disk Size (GB).
          Example: 'Hard Disk 1:100;Hard Disk 2:200'. Shortened format is also valid: '1:100;2:200'"
-        tags: [user_input]
+        tags: []
     artifacts:
       icon:
         file: shell-icon.png
