@@ -94,7 +94,10 @@ The shell comprises:
 |File name|Description|
 |:---|:---|
 |VMware vCenter Cloud Provider Shell 2G.zip|Device shell package|
-|cloudshell-vcenter-dependencies-package-1.0.x.zip|Shell Python dependencies (for offline deployments only)|
+|cloudshell-VMware-vCenter-Cloud-Provider-Shell-2G-dependencies-win32-package-3.3.0.zip
+,cloudshell-VMware-vCenter-Cloud-Provider-Shell-2G-dependencies-linux-package-3.3.0.zip
+|Shell Python dependencies (for offline deployments only)|
+|vCenter.VLAN.Port.Group.zip|Service package for VLAN connections to an existing port group|
 
 # Importing and Configuring the Shell
 This section describes how to import the VMware vCenter Cloud Provider Shell 2G shell and configure and modify the shell’s devices.
