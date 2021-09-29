@@ -36,7 +36,7 @@ These include the following:
 * Capability to customize the VM's technical specs (storage size, memory, CPU), support for programmatically creating missing network interfaces if the VM is missing virtual network adapters
 * Option to view cluster usage stats directly from the sandbox
 
-For details, see the [Add VMware vCenter Cloud Provider Resource](https://help.quali.com/Online%20Help/0.0/Portal/Content/Admn/vCenter-Cld-Prvdr-Rsc.htm) article in the 2021.2 online help. 
+For details, see the [Add VMware vCenter Cloud Provider Resource](https://help.quali.com/Online%20Help/0.0/Portal/Content/Admn/vCenter-Cld-Prvdr-Rsc.htm) CloudShell Help article. 
 
 For more information on the device, see the vendor's official product documentation.
 
