@@ -42,6 +42,11 @@
                     <Parameter Description="" DisplayName="Datastore Name" Name="datastore_name" Type="String" />
                 </Parameters>
             </Command>
+            <Command Description="" DisplayName="Get Attribute Hints" Name="get_attribute_hints" Tags="allow_unreserved">
+                <Parameters>
+                    <Parameter Description="" DisplayName="request" Name="request" Type="String" />
+                </Parameters>
+            </Command>
         </Category>
         <Category Name="Power">
             <Command Description="" DisplayName="Power On" Name="PowerOn" Tags="power" />

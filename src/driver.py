@@ -198,3 +198,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
 
     def get_vm_web_console(self, context, ports):
         return self.command_orchestrator.get_vm_web_console(context)
+
+    def get_attribute_hints(self, context, request):
+        return self.command_orchestrator.get_attribute_hints(context, request)
