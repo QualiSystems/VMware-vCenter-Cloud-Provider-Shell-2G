@@ -1,12 +1,20 @@
-from cloudshell.cp.core import DriverRequestParser
-from cloudshell.cp.core.models import DeleteSavedApp, DeployApp, DriverResponse, SaveApp
-from cloudshell.cp.core.utils import single
-from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
+from typing import TYPE_CHECKING
 
+from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
+from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
+from cloudshell.shell.core.session.logging_session import LoggingSessionContext
+
+from cloudshell.cp.vcenter.api_client import VCenterAPIClient
 from cloudshell.cp.vcenter.commands.command_orchestrator import CommandOrchestrator
-from cloudshell.cp.vcenter.common.vcenter.model_auto_discovery import (
-    VCenterAutoModelDiscovery,
-)
+from cloudshell.cp.vcenter.flows.autoload import VCenterAutoloadFlow
+from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
+
+if TYPE_CHECKING:
+    from cloudshell.shell.core.driver_context import (
+        AutoLoadCommandContext,
+        AutoLoadDetails,
+        InitCommandContext,
+    )
 
 
 class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
@@ -18,7 +26,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
 
         ctor must be without arguments, it is created with reflection at run time
         """
-        self.request_parser = DriverRequestParser()
         self.command_orchestrator = CommandOrchestrator()  # type: CommandOrchestrator
         self.deployments = {}
         self.deployments[
@@ -34,8 +41,40 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             "VMware vCenter Cloud Provider 2G.vCenter VM From Image 2G"
         ] = self.deploy_from_image
 
-    def initialize(self, **kwargs):
+    def initialize(self, context: "InitCommandContext"):
         pass
+
+    def get_inventory(self, context: "AutoLoadCommandContext") -> "AutoLoadDetails":
+        """Called when the cloud provider resource is created in the inventory.
+
+        Method validates the values of the cloud provider attributes, entered by
+        the user as part of the cloud provider resource creation. In addition,
+        this would be the place to assign values programmatically to optional
+        attributes that were not given a value by the user. If one of the
+        validations failed, the method should raise an exception
+        :param context: the context the command runs on
+        :return Attribute and sub-resource information for the Shell resource
+        you can return an AutoLoadDetails object
+        """
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Autoload command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+
+            vcenter_client = VCenterAPIClient(
+                host=resource_config.address,
+                user=resource_config.user,
+                password=resource_config.password,
+                logger=logger,
+            )
+
+            autoload_flow = VCenterAutoloadFlow(
+                resource_config=resource_config,
+                vcenter_client=vcenter_client,
+                logger=logger,
+            )
+
+            return autoload_flow.discover()
 
     def ApplyConnectivityChanges(self, context, request):
         return self.command_orchestrator.connect_bulk(context, request)
@@ -74,31 +113,31 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
 
     def Deploy(self, context, request=None, cancellation_context=None):
         actions = self.request_parser.convert_driver_request_to_actions(request)
-        deploy_action = single(actions, lambda x: isinstance(x, DeployApp))
+        deploy_action = single(actions, lambda x: isinstance(x, DeployApp))  # noqa
         deployment_name = deploy_action.actionParams.deployment.deploymentPath
 
         if deployment_name in self.deployments.keys():
             deploy_method = self.deployments[deployment_name]
             deploy_result = deploy_method(context, deploy_action, cancellation_context)
-            return DriverResponse([deploy_result]).to_driver_response_json()
+            return DriverResponse([deploy_result]).to_driver_response_json()  # noqa
         else:
             raise Exception("Could not find the deployment")
 
     def SaveApp(self, context, request, cancellation_context=None):
         actions = self.request_parser.convert_driver_request_to_actions(request)
-        save_actions = [x for x in actions if isinstance(x, SaveApp)]
+        save_actions = [x for x in actions if isinstance(x, SaveApp)]  # noqa
         save_app_results = self.command_orchestrator.save_sandbox(
             context, save_actions, cancellation_context
         )
-        return DriverResponse(save_app_results).to_driver_response_json()
+        return DriverResponse(save_app_results).to_driver_response_json()  # noqa
 
     def DeleteSavedApps(self, context, request, cancellation_context=None):
         actions = self.request_parser.convert_driver_request_to_actions(request)
-        delete_actions = [x for x in actions if isinstance(x, DeleteSavedApp)]
+        delete_actions = [x for x in actions if isinstance(x, DeleteSavedApp)]  # noqa
         save_app_results = self.command_orchestrator.delete_saved_sandbox(
             context, delete_actions, cancellation_context
         )
-        return DriverResponse(save_app_results).to_driver_response_json()
+        return DriverResponse(save_app_results).to_driver_response_json()  # noqa
 
     def deploy_from_template(self, context, deploy_action, cancellation_context):
         return self.command_orchestrator.deploy_from_template(
@@ -121,14 +160,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         return self.command_orchestrator.deploy_from_image(
             context, deploy_action, cancellation_context
         )
-
-    def get_inventory(self, context):
-        """Get inventory.
-
-        :type context: models.QualiDriverModels.AutoLoadCommandContext
-        """
-        validator = VCenterAutoModelDiscovery()
-        return validator.validate_and_discover(context)
 
     def remote_save_snapshot(self, context, ports, snapshot_name, save_memory):
         """Saves virtual machine to a snapshot.
