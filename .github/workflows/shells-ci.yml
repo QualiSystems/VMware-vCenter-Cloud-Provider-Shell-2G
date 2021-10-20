@@ -2,11 +2,15 @@ name: CI
 
 on:
   push:
-    branches:
-      - "*"
+    paths-ignore:
+      - "README.md"
+      - "docs/readme.md"
+      - "docs/readme.rst"
   pull_request:
-    branches:
-      - "*"
+    paths-ignore:
+      - "README.md"
+      - "docs/readme.md"
+      - "docs/readme.rst"
   release:
     types: [published]
 
@@ -55,20 +59,48 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v2
+      - name: Get current version
+        id: currentVersion
+        uses: mikefarah/yq@master
         with:
-          python-version: 3.7
-      - name: Install dependencies
-        run: |
-          sudo apt-get -y install jq
-          pip install yq
-      - name: Check version
+          cmd: yq e ".metadata.template_version" shell-definition.yaml
+      - name: Save shell-definition.yaml from master
         run: |
           git clone https://github.com/${{ github.repository }}.git ${{ github.repository }}
+          BASE_DIR=`pwd`
           cd ${{ github.repository }}
           git checkout -qf ${{ github.head_ref }}
-          ! diff <(yq .metadata.template_version shell-definition.yaml) <(git show master__old_code:shell-definition.yaml > tmp.yaml && yq .metadata.template_version tmp.yaml)
+          git show master__old_code:shell-definition.yaml > $BASE_DIR/tmp.yaml
+      - name: Get master version
+        id: masterVersion
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq e ".metadata.template_version" tmp.yaml
+      - name: Check version
+        run: |
+          ! diff <(echo "${{ steps.currentVersion.outputs.result }}") <(echo "${{ steps.masterVersion.outputs.result }}")
+  check-not-shell-in-shell-name:
+    name: Check "Shell" is not in the Shell name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: get Node Type
+        id: getNodeType
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq e ".node_types | keys | .[0]" shell-definition.yaml
+      - name: Check shell is not in the Shell name
+        run: |
+          NODE_TYPE="${{ steps.getNodeType.outputs.result }}"
+          SHELL_NAME=`echo ${NODE_TYPE:16} | tr "[:upper:]" "[:lower:]"`
+          if [[ $SHELL_NAME == *" shell "* ]]
+          then
+            echo "You should remove 'Shell' from the Shell name"
+            exit 1
+          else
+            echo "not found"
+          fi
   create-gh-release:
     needs: [pre-commit, pack]
     if: ${{ github.ref == 'refs/heads/master__old_code' && github.event_name == 'push' }}
