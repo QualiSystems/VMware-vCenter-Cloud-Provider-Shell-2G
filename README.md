@@ -15,6 +15,7 @@ Release date: May 2021
 * [Importing and Configuring the Shell](#importing-and-configuring-the-shell)
 * [Updating Python Dependencies for Shells](#updating-python-dependencies-for-shells)
 * [Typical Workflows](#typical-workflows)
+* [Workarounds](#workarounds)
 * [References](#references)
 * [Release Notes](#release-notes)
 
@@ -199,7 +200,28 @@ In online mode, the execution server automatically downloads and extracts the ap
 
 # Typical Workflows
 
-## **Workflow 1 - Rename HHD attribute to HDD** 
+## Connect vCenter Apps to an existing VLAN port group
+Using the vCenter 2nd Gen shell, it is possible to connect an App or deployed App to an existing port group. This enables you to connect deployed Apps in different sandboxes and also to connect Apps deployed in a sandbox to static VMs on the vCenter server.
+
+__Note__: This capability is supported only for vCenter Apps and applies to port groups created on the datacenter defined on the vCenter cloud provider resource.
+For illustration purposes, the below procedure assumes you want to connect an App to port group "QS_vSwitch1_VLAN_100_Access".
+
+__To connect an App to an existing port group:__
+1. Download the _vCenter.VLAN.Port.Group.zip_ file from the vCenter 2G shell's Integrations [page](https://community.quali.com/repos/5386/vmware-vcenter-cloud-provider-shell-2g).
+2. Import the ZIP file into CloudShell Portal.
+3. Open the blueprint or sandbox. 
+4. From the __App / Service__ pane, drag the new __vCenter VLAN Port Group__ service into the diagram.
+5. Set the service's details:
+   - __Port Group Name__: Full port group name. For example: "QS_vSwitch1_VLAN_100_Access".
+   - __VLAN ID__: Port group's VLAN ID. For example: "100".
+6. Click __Add__.
+7. Create connection requirements between the vCenter Apps and the service.
+8. Deploy the connection(s), as appropriate. 
+9. <br>The connection is created like with any other VLAN service. This includes by deploying the App, connecting the purple Connector line if the App is already deployed, and reserving the blueprint.
+
+# Workarounds
+
+## **Rename HHD attribute to HDD** 
 
 When using vCenter 2G Shell version 2.0.0 and 2.2.0, the App deployment types include an attribute that is incorrectly named "HHD" instead of "HDD". The below procedure explains how to fix this issue, which is done in CloudShell’s SQL Server’s _Quali_ database.
   ![Image][3]
@@ -242,25 +264,6 @@ update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM Fro
 
 6. To verify, go to CloudShell Portal’s __Manage>Apps__ page. Open an App template that uses a vCenter 2G Shell resource. Make sure the vCenter 2G deployment types include the __HDD__ attribute:
 ![Image][9]
-
-## Workflow 2 - Connect vCenter Apps to an existing VLAN port group
-Using the vCenter 2nd Gen shell, it is possible to connect an App or deployed App to an existing port group. This enables you to connect deployed Apps in different sandboxes and also to connect Apps deployed in a sandbox to static VMs on the vCenter server.
-
-__Note__: This capability is supported only for vCenter Apps and applies to port groups created on the datacenter defined on the vCenter cloud provider resource.
-For illustration purposes, the below procedure assumes you want to connect an App to port group "QS_vSwitch1_VLAN_100_Access".
-
-__To connect an App to an existing port group:__
-1. Download the _vCenter.VLAN.Port.Group.zip_ file from the vCenter 2G shell's Integrations [page](https://community.quali.com/repos/5386/vmware-vcenter-cloud-provider-shell-2g).
-2. Import the ZIP file into CloudShell Portal.
-3. Open the blueprint or sandbox. 
-4. From the __App / Service__ pane, drag the new __vCenter VLAN Port Group__ service into the diagram.
-5. Set the service's details:
-   - __Port Group Name__: Full port group name. For example: "QS_vSwitch1_VLAN_100_Access".
-   - __VLAN ID__: Port group's VLAN ID. For example: "100".
-6. Click __Add__.
-7. Create connection requirements between the vCenter Apps and the service.
-8. Deploy the connection(s), as appropriate. 
-9. <br>The connection is created like with any other VLAN service. This includes by deploying the App, connecting the purple Connector line if the App is already deployed, and reserving the blueprint.
 
 # References
 To download and share integrations, see [Quali Community's Integrations](https://community.quali.com/integrations). 
