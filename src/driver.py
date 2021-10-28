@@ -1,5 +1,11 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
+from cloudshell.cp.core.cancellation_manager import CancellationContextManager
+from cloudshell.cp.core.request_actions import DeployVMRequestActions
+from cloudshell.cp.core.reservation_info import ReservationInfo
+from cloudshell.shell.core.driver_context import CancellationContext
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
 from cloudshell.shell.core.session.logging_session import LoggingSessionContext
@@ -7,6 +13,8 @@ from cloudshell.shell.core.session.logging_session import LoggingSessionContext
 from cloudshell.cp.vcenter.api_client import VCenterAPIClient
 from cloudshell.cp.vcenter.commands.command_orchestrator import CommandOrchestrator
 from cloudshell.cp.vcenter.flows.autoload import VCenterAutoloadFlow
+from cloudshell.cp.vcenter.flows.deploy_vm import get_deploy_flow
+from cloudshell.cp.vcenter.models import deploy_app
 from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
 
 if TYPE_CHECKING:
@@ -14,6 +22,7 @@ if TYPE_CHECKING:
         AutoLoadCommandContext,
         AutoLoadDetails,
         InitCommandContext,
+        ResourceCommandContext,
     )
 
 
@@ -27,24 +36,11 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         ctor must be without arguments, it is created with reflection at run time
         """
         self.command_orchestrator = CommandOrchestrator()  # type: CommandOrchestrator
-        self.deployments = {}
-        self.deployments[
-            "VMware vCenter Cloud Provider 2G.vCenter VM From VM 2G"
-        ] = self.deploy_clone_from_vm
-        self.deployments[
-            "VMware vCenter Cloud Provider 2G.vCenter VM From Linked Clone 2G"
-        ] = self.deploy_from_linked_clone
-        self.deployments[
-            "VMware vCenter Cloud Provider 2G.vCenter VM From Template 2G"
-        ] = self.deploy_from_template
-        self.deployments[
-            "VMware vCenter Cloud Provider 2G.vCenter VM From Image 2G"
-        ] = self.deploy_from_image
 
-    def initialize(self, context: "InitCommandContext"):
+    def initialize(self, context: InitCommandContext):
         pass
 
-    def get_inventory(self, context: "AutoLoadCommandContext") -> "AutoLoadDetails":
+    def get_inventory(self, context: AutoLoadCommandContext) -> AutoLoadDetails:
         """Called when the cloud provider resource is created in the inventory.
 
         Method validates the values of the cloud provider attributes, entered by
@@ -75,6 +71,53 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             )
 
             return autoload_flow.discover()
+
+    def Deploy(
+        self,
+        context: ResourceCommandContext,
+        request: str,
+        cancellation_context: CancellationContext,
+    ) -> str:
+        """Called when reserving a sandbox during setup.
+
+        Method creates the compute resource in the cloud provider - VM instance or
+        container. If App deployment fails, return a "success false" action result.
+        :param request: A JSON string with the list of requested deployment actions
+        """
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Deploy command...")
+            logger.debug(f"Request: {request}")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+
+            cancellation_manager = CancellationContextManager(cancellation_context)
+            reservation_info = ReservationInfo.from_resource_context(context)
+            vcenter_client = VCenterAPIClient(
+                host=resource_config.address,
+                user=resource_config.user,
+                password=resource_config.password,
+                logger=logger,
+            )
+
+            for deploy_app_cls in (
+                deploy_app.VMFromVMDeployApp,
+                deploy_app.VMFromTemplateDeployApp,
+                deploy_app.VMFromLinkedCloneDeployApp,
+                deploy_app.VMFromImageDeployApp,
+            ):
+                DeployVMRequestActions.register_deployment_path(deploy_app_cls)
+
+            request_actions = DeployVMRequestActions.from_request(request, api)
+            deploy_flow_class = get_deploy_flow(request_actions)
+            deploy_flow = deploy_flow_class(
+                resource_config=resource_config,
+                reservation_info=reservation_info,
+                vcenter_client=vcenter_client,
+                cs_api=api,
+                cancellation_manager=cancellation_manager,
+                logger=logger,
+            )
+            return deploy_flow.deploy(request_actions=request_actions)
 
     def ApplyConnectivityChanges(self, context, request):
         return self.command_orchestrator.connect_bulk(context, request)
@@ -111,18 +154,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
     def PowerCycle(self, context, ports, delay):
         return self.command_orchestrator.power_cycle(context, ports, delay)
 
-    def Deploy(self, context, request=None, cancellation_context=None):
-        actions = self.request_parser.convert_driver_request_to_actions(request)
-        deploy_action = single(actions, lambda x: isinstance(x, DeployApp))  # noqa
-        deployment_name = deploy_action.actionParams.deployment.deploymentPath
-
-        if deployment_name in self.deployments.keys():
-            deploy_method = self.deployments[deployment_name]
-            deploy_result = deploy_method(context, deploy_action, cancellation_context)
-            return DriverResponse([deploy_result]).to_driver_response_json()  # noqa
-        else:
-            raise Exception("Could not find the deployment")
-
     def SaveApp(self, context, request, cancellation_context=None):
         actions = self.request_parser.convert_driver_request_to_actions(request)
         save_actions = [x for x in actions if isinstance(x, SaveApp)]  # noqa
@@ -138,28 +169,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             context, delete_actions, cancellation_context
         )
         return DriverResponse(save_app_results).to_driver_response_json()  # noqa
-
-    def deploy_from_template(self, context, deploy_action, cancellation_context):
-        return self.command_orchestrator.deploy_from_template(
-            context, deploy_action, cancellation_context
-        )
-
-    def deploy_clone_from_vm(self, context, deploy_action, cancellation_context):
-        return self.command_orchestrator.deploy_clone_from_vm(
-            context, deploy_action, cancellation_context
-        )
-
-    def deploy_from_linked_clone(self, context, deploy_action, cancellation_context):
-        return self.command_orchestrator.deploy_from_linked_clone(
-            context, deploy_action, cancellation_context
-        )
-
-    def deploy_from_image(self, context, deploy_action, cancellation_context):
-        if cancellation_context is None:
-            cancellation_context = CancellationContext()  # noqa: F821
-        return self.command_orchestrator.deploy_from_image(
-            context, deploy_action, cancellation_context
-        )
 
     def remote_save_snapshot(self, context, ports, snapshot_name, save_memory):
         """Saves virtual machine to a snapshot.

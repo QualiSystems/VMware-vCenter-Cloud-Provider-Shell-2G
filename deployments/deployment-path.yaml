@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 metadata:
   template_name: VMware vCenter
   template_author: Quali
-  template_version: 1.0.0
+  template_version: 2.0.0
   template_icon: shell-icon.png
 
 description: >
@@ -95,15 +95,18 @@ node_types:
         tags: [user_input]
       Private IP:
         type: string
-        description: "(Only applies to Windows and Linux VMs) The private static IP to set on the first vNIC of the VM. If Customization Spec is specified, the value specified in the Private IP parameter will be used.
-        Note: If Customization Spec is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page"
+        description: "(Only applies to Windows and Linux VMs) The private static IP to
+        set on the first vNIC of the VM. If Customization Spec is specified, the value
+        specified in the Private IP parameter will be used.
+        Note: If Customization Spec is not specified, a new one will be created for the
+        VM. For Windows VMs, make sure to specify a password in the App resource page"
         tags: [user_input]
       CPU:
-        type: string
+        type: integer
         description: "The number of CPUs to be configured on the VM"
         tags: [user_input]
       RAM:
-        type: string
+        type: float
         description: "The amount of RAM (GB) to be configured on the VM"
         tags: [user_input]
       HDD:
@@ -313,11 +316,11 @@ node_types:
         Note: If Customization Spec is not specified, a new one will be created for the VM. For Windows VMs, make sure to specify a password in the App resource page"
         tags: [user_input]
       CPU:
-        type: string
+        type: integer
         description: "The number of CPUs to be configured on the VM"
         tags: [user_input]
       RAM:
-        type: string
+        type: float
         description: "The amount of RAM (GB) to be configured on the VM"
         tags: [user_input]
       HDD:
