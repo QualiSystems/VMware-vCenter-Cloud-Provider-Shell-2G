@@ -3,9 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from cloudshell.cp.core.cancellation_manager import CancellationContextManager
-from cloudshell.cp.core.request_actions import DeployVMRequestActions
+from cloudshell.cp.core.request_actions import DeployedVMActions, DeployVMRequestActions
 from cloudshell.cp.core.reservation_info import ReservationInfo
-from cloudshell.shell.core.driver_context import CancellationContext
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
 from cloudshell.shell.core.session.logging_session import LoggingSessionContext
@@ -14,15 +13,18 @@ from cloudshell.cp.vcenter.api_client import VCenterAPIClient
 from cloudshell.cp.vcenter.commands.command_orchestrator import CommandOrchestrator
 from cloudshell.cp.vcenter.flows.autoload import VCenterAutoloadFlow
 from cloudshell.cp.vcenter.flows.deploy_vm import get_deploy_flow
-from cloudshell.cp.vcenter.models import deploy_app
+from cloudshell.cp.vcenter.flows.power_flow import VCenterPowerFlow
+from cloudshell.cp.vcenter.models import deploy_app, deployed_app
 from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
 
 if TYPE_CHECKING:
     from cloudshell.shell.core.driver_context import (
         AutoLoadCommandContext,
         AutoLoadDetails,
+        CancellationContext,
         InitCommandContext,
         ResourceCommandContext,
+        ResourceRemoteCommandContext,
     )
 
 
@@ -31,11 +33,22 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         pass
 
     def __init__(self):
-        """Init function.
-
-        ctor must be without arguments, it is created with reflection at run time
-        """
         self.command_orchestrator = CommandOrchestrator()  # type: CommandOrchestrator
+        for deploy_app_cls in (
+            deploy_app.VMFromVMDeployApp,
+            deploy_app.VMFromTemplateDeployApp,
+            deploy_app.VMFromLinkedCloneDeployApp,
+            deploy_app.VMFromImageDeployApp,
+        ):
+            DeployVMRequestActions.register_deployment_path(deploy_app_cls)
+
+        for deployed_app_cls in (
+            deployed_app.VMFromVMDeployApp,
+            deployed_app.VMFromTemplateDeployApp,
+            deployed_app.VMFromLinkedCloneDeployApp,
+            deployed_app.VMFromImageDeployApp,
+        ):
+            DeployedVMActions.register_deployment_path(deployed_app_cls)
 
     def initialize(self, context: InitCommandContext):
         pass
@@ -99,14 +112,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 logger=logger,
             )
 
-            for deploy_app_cls in (
-                deploy_app.VMFromVMDeployApp,
-                deploy_app.VMFromTemplateDeployApp,
-                deploy_app.VMFromLinkedCloneDeployApp,
-                deploy_app.VMFromImageDeployApp,
-            ):
-                DeployVMRequestActions.register_deployment_path(deploy_app_cls)
-
             request_actions = DeployVMRequestActions.from_request(request, api)
             deploy_flow_class = get_deploy_flow(request_actions)
             deploy_flow = deploy_flow_class(
@@ -118,6 +123,52 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 logger=logger,
             )
             return deploy_flow.deploy(request_actions=request_actions)
+
+    def PowerOn(self, context: ResourceRemoteCommandContext, ports: list[str]):
+        """Called when reserving a sandbox during setup.
+
+        Call for each app in the sandbox can also be run manually by
+        the sandbox end-user from the deployed App's commands pane.
+        Method spins up the VM If the operation fails, method should raise an exception.
+        """
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Power On command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient(
+                host=resource_config.address,
+                user=resource_config.user,
+                password=resource_config.password,
+                logger=logger,
+            )
+            resource = context.remote_endpoints[0]
+            actions = DeployedVMActions.from_remote_resource(resource, api)
+            return VCenterPowerFlow(
+                vcenter_client, actions.deployed_app, resource_config, logger
+            ).power_on()
+
+    def PowerOff(self, context: ResourceRemoteCommandContext, ports: list[str]):
+        """Called during sandbox's teardown.
+
+        Can also be run manually by the sandbox end-user from the deployed
+        App's commands pane. Method shuts down (or powers off) the VM instance.
+        If the operation fails, method should raise an exception.
+        """
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Power Off command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient(
+                host=resource_config.address,
+                user=resource_config.user,
+                password=resource_config.password,
+                logger=logger,
+            )
+            resource = context.remote_endpoints[0]
+            actions = DeployedVMActions.from_remote_resource(resource, api)
+            return VCenterPowerFlow(
+                vcenter_client, actions.deployed_app, resource_config, logger
+            ).power_off()
 
     def ApplyConnectivityChanges(self, context, request):
         return self.command_orchestrator.connect_bulk(context, request)
@@ -135,20 +186,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         return self.command_orchestrator.refresh_ip(
             context, cancellation_context, ports
         )
-
-    def PowerOff(self, context, ports):
-        return self.command_orchestrator.power_off(context, ports)
-
-    # the name is by the Qualisystems conventions
-    def PowerOn(self, context, ports):
-        """Powers off the remote vm.
-
-        :param models.QualiDriverModels.ResourceRemoteCommandContext context:
-            the context the command runs on
-        :param list[string] ports: the ports of the connection between the remote
-            resource and the local resource, NOT IN USE!!!
-        """
-        return self.command_orchestrator.power_on(context, ports)
 
     # the name is by the Qualisystems conventions
     def PowerCycle(self, context, ports, delay):
