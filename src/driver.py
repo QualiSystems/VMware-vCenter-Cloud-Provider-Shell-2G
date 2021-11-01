@@ -13,6 +13,9 @@ from cloudshell.cp.core.reservation_info import ReservationInfo
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
 from cloudshell.shell.core.session.logging_session import LoggingSessionContext
+from cloudshell.shell.flows.connectivity.parse_request_service import (
+    ParseConnectivityRequestService,
+)
 
 from cloudshell.cp.vcenter.api_client import VCenterAPIClient
 from cloudshell.cp.vcenter.commands.command_orchestrator import CommandOrchestrator
@@ -22,6 +25,7 @@ from cloudshell.cp.vcenter.flows import (
     get_deploy_flow,
     refresh_ip,
 )
+from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlow
 from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
 from cloudshell.cp.vcenter.models import deploy_app, deployed_app
 from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
@@ -232,8 +236,21 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 vcenter_client, resource_config, cancellation_manager, logger
             ).get_vm_details(actions)
 
-    def ApplyConnectivityChanges(self, context, request):
-        return self.command_orchestrator.connect_bulk(context, request)
+    def ApplyConnectivityChanges(self, context: ResourceCommandContext, request: str):
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Apply Connectivity Changes command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            parse_connectivity_req_service = ParseConnectivityRequestService(
+                is_vlan_range_supported=True, is_multi_vlan_supported=True
+            )
+            return VCenterConnectivityFlow(
+                vcenter_client,
+                resource_config,
+                parse_connectivity_req_service,
+                logger,
+            ).apply_connectivity(request)
 
     def disconnect_all(self, context, ports):
         return self.command_orchestrator.disconnect_all(context, ports)
