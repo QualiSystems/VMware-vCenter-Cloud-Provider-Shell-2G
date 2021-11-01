@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
 from cloudshell.cp.core.cancellation_manager import CancellationContextManager
@@ -170,6 +171,28 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 vcenter_client, actions.deployed_app, resource_config, logger
             ).power_off()
 
+    def PowerCycle(
+        self, context: ResourceRemoteCommandContext, ports: list[str], delay
+    ):
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Power Cycle command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient(
+                host=resource_config.address,
+                user=resource_config.user,
+                password=resource_config.password,
+                logger=logger,
+            )
+            resource = context.remote_endpoints[0]
+            actions = DeployedVMActions.from_remote_resource(resource, api)
+            power_flow = VCenterPowerFlow(
+                vcenter_client, actions.deployed_app, resource_config, logger
+            )
+            power_flow.power_off()
+            time.sleep(float(delay))
+            power_flow.power_on()
+
     def ApplyConnectivityChanges(self, context, request):
         return self.command_orchestrator.connect_bulk(context, request)
 
@@ -186,10 +209,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         return self.command_orchestrator.refresh_ip(
             context, cancellation_context, ports
         )
-
-    # the name is by the Qualisystems conventions
-    def PowerCycle(self, context, ports, delay):
-        return self.command_orchestrator.power_cycle(context, ports, delay)
 
     def SaveApp(self, context, request, cancellation_context=None):
         actions = self.request_parser.convert_driver_request_to_actions(request)
