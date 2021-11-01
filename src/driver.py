@@ -4,7 +4,11 @@ import time
 from typing import TYPE_CHECKING
 
 from cloudshell.cp.core.cancellation_manager import CancellationContextManager
-from cloudshell.cp.core.request_actions import DeployedVMActions, DeployVMRequestActions
+from cloudshell.cp.core.request_actions import (
+    DeployedVMActions,
+    DeployVMRequestActions,
+    GetVMDetailsRequestActions,
+)
 from cloudshell.cp.core.reservation_info import ReservationInfo
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
@@ -18,6 +22,7 @@ from cloudshell.cp.vcenter.flows import (
     get_deploy_flow,
     refresh_ip,
 )
+from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
 from cloudshell.cp.vcenter.models import deploy_app, deployed_app
 from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
 
@@ -47,10 +52,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             DeployVMRequestActions.register_deployment_path(deploy_app_cls)
 
         for deployed_app_cls in (
-            deployed_app.VMFromVMDeployApp,
-            deployed_app.VMFromTemplateDeployApp,
-            deployed_app.VMFromLinkedCloneDeployApp,
-            deployed_app.VMFromImageDeployApp,
+            deployed_app.VMFromVMDeployedApp,
+            deployed_app.VMFromTemplateDeployedApp,
+            deployed_app.VMFromLinkedCloneDeployedApp,
+            deployed_app.VMFromImageDeployedApp,
         ):
             DeployedVMActions.register_deployment_path(deployed_app_cls)
 
@@ -201,6 +206,32 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 logger,
             )
 
+    def GetVmDetails(
+        self,
+        context: ResourceCommandContext,
+        requests: str,
+        cancellation_context: CancellationContext,
+    ):
+        """Called when reserving a sandbox during setup.
+
+        Call for each app in the sandbox can also be run manually by the sandbox
+        end-user from the deployed App's VM Details pane. Method queries cloud provider
+        for instance operating system, specifications and networking information and
+        returns that as a json serialized driver response containing a list of
+        VmDetailsData. If the operation fails, method should raise an exception.
+        """
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Get VM Details command...")
+            logger.debug(f"Requests: {requests}")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            cancellation_manager = CancellationContextManager(cancellation_context)
+            actions = GetVMDetailsRequestActions.from_request(requests, api)
+            return VCenterGetVMDetailsFlow(
+                vcenter_client, resource_config, cancellation_manager, logger
+            ).get_vm_details(actions)
+
     def ApplyConnectivityChanges(self, context, request):
         return self.command_orchestrator.connect_bulk(context, request)
 
@@ -286,11 +317,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
 
     def get_cluster_usage(self, context, datastore_name):
         return self.command_orchestrator.get_cluster_usage(context, datastore_name)
-
-    def GetVmDetails(self, context, cancellation_context, requests):
-        return self.command_orchestrator.get_vm_details(
-            context, cancellation_context, requests
-        )
 
     def reconfigure_vm(self, context, ports, cpu, ram, hdd):
         return self.command_orchestrator.reconfigure_vm(context, cpu, ram, hdd)
