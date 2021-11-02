@@ -4,11 +4,6 @@ import time
 from typing import TYPE_CHECKING
 
 from cloudshell.cp.core.cancellation_manager import CancellationContextManager
-from cloudshell.cp.core.request_actions import (
-    DeployedVMActions,
-    DeployVMRequestActions,
-    GetVMDetailsRequestActions,
-)
 from cloudshell.cp.core.reservation_info import ReservationInfo
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
@@ -22,12 +17,27 @@ from cloudshell.cp.vcenter.commands.command_orchestrator import CommandOrchestra
 from cloudshell.cp.vcenter.flows import (
     VCenterAutoloadFlow,
     VCenterPowerFlow,
+    delete_instance,
     get_deploy_flow,
     refresh_ip,
 )
 from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlow
 from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
-from cloudshell.cp.vcenter.models import deploy_app, deployed_app
+from cloudshell.cp.vcenter.models.deploy_app import (
+    VCenterDeployVMRequestActions,
+    VMFromImageDeployApp,
+    VMFromLinkedCloneDeployApp,
+    VMFromTemplateDeployApp,
+    VMFromVMDeployApp,
+)
+from cloudshell.cp.vcenter.models.deployed_app import (
+    VCenterDeployedVMActions,
+    VCenterGetVMDetailsRequestActions,
+    VMFromImageDeployedApp,
+    VMFromLinkedCloneDeployedApp,
+    VMFromTemplateDeployedApp,
+    VMFromVMDeployedApp,
+)
 from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
 
 if TYPE_CHECKING:
@@ -48,20 +58,20 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
     def __init__(self):
         self.command_orchestrator = CommandOrchestrator()  # type: CommandOrchestrator
         for deploy_app_cls in (
-            deploy_app.VMFromVMDeployApp,
-            deploy_app.VMFromTemplateDeployApp,
-            deploy_app.VMFromLinkedCloneDeployApp,
-            deploy_app.VMFromImageDeployApp,
+            VMFromVMDeployApp,
+            VMFromTemplateDeployApp,
+            VMFromLinkedCloneDeployApp,
+            VMFromImageDeployApp,
         ):
-            DeployVMRequestActions.register_deployment_path(deploy_app_cls)
+            VCenterDeployVMRequestActions.register_deployment_path(deploy_app_cls)
 
         for deployed_app_cls in (
-            deployed_app.VMFromVMDeployedApp,
-            deployed_app.VMFromTemplateDeployedApp,
-            deployed_app.VMFromLinkedCloneDeployedApp,
-            deployed_app.VMFromImageDeployedApp,
+            VMFromVMDeployedApp,
+            VMFromTemplateDeployedApp,
+            VMFromLinkedCloneDeployedApp,
+            VMFromImageDeployedApp,
         ):
-            DeployedVMActions.register_deployment_path(deployed_app_cls)
+            VCenterDeployedVMActions.register_deployment_path(deployed_app_cls)
 
     def initialize(self, context: InitCommandContext):
         pass
@@ -114,7 +124,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             reservation_info = ReservationInfo.from_resource_context(context)
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
 
-            request_actions = DeployVMRequestActions.from_request(request, api)
+            request_actions = VCenterDeployVMRequestActions.from_request(request, api)
             deploy_flow_class = get_deploy_flow(request_actions)
             deploy_flow = deploy_flow_class(
                 resource_config=resource_config,
@@ -139,7 +149,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
             resource = context.remote_endpoints[0]
-            actions = DeployedVMActions.from_remote_resource(resource, api)
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
             return VCenterPowerFlow(
                 vcenter_client, actions.deployed_app, resource_config, logger
             ).power_on()
@@ -157,7 +167,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
             resource = context.remote_endpoints[0]
-            actions = DeployedVMActions.from_remote_resource(resource, api)
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
             return VCenterPowerFlow(
                 vcenter_client, actions.deployed_app, resource_config, logger
             ).power_off()
@@ -171,7 +181,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
             resource = context.remote_endpoints[0]
-            actions = DeployedVMActions.from_remote_resource(resource, api)
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
             power_flow = VCenterPowerFlow(
                 vcenter_client, actions.deployed_app, resource_config, logger
             )
@@ -199,9 +209,8 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
             resource = context.remote_endpoints[0]
-            actions = DeployedVMActions.from_remote_resource(resource, api)
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
             cancellation_manager = CancellationContextManager(cancellation_context)
-            # noinspection PyTypeChecker
             refresh_ip(
                 vcenter_client,
                 actions.deployed_app,
@@ -231,7 +240,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
             cancellation_manager = CancellationContextManager(cancellation_context)
-            actions = GetVMDetailsRequestActions.from_request(requests, api)
+            actions = VCenterGetVMDetailsRequestActions.from_request(requests, api)
             return VCenterGetVMDetailsFlow(
                 vcenter_client, resource_config, cancellation_manager, logger
             ).get_vm_details(actions)
@@ -242,6 +251,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            # todo check
             parse_connectivity_req_service = ParseConnectivityRequestService(
                 is_vlan_range_supported=True, is_multi_vlan_supported=True
             )
@@ -252,14 +262,30 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 logger,
             ).apply_connectivity(request)
 
+    def DeleteInstance(self, context: ResourceRemoteCommandContext, ports: list[str]):
+        """Called when removing a deployed App from the sandbox.
+
+        Method deletes the VM from the cloud provider. If the operation fails, method
+        should raise an exception.
+        """
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Delete Instance command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            resource = context.remote_endpoints[0]
+            actions = VCenterGetVMDetailsRequestActions.from_remote_resource(
+                resource, api
+            )
+            delete_instance(
+                vcenter_client, actions.deployed_app, resource_config, logger
+            )
+
     def disconnect_all(self, context, ports):
         return self.command_orchestrator.disconnect_all(context, ports)
 
     def disconnect(self, context, ports, network_name):
         return self.command_orchestrator.disconnect(context, ports, network_name)
-
-    def DeleteInstance(self, context, ports):
-        return self.command_orchestrator.DeleteInstance(context, ports)
 
     def SaveApp(self, context, request, cancellation_context=None):
         actions = self.request_parser.convert_driver_request_to_actions(request)
