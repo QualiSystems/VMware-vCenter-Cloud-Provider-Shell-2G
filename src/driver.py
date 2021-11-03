@@ -24,6 +24,7 @@ from cloudshell.cp.vcenter.flows import (
 from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlow
 from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
 from cloudshell.cp.vcenter.models.deploy_app import (
+    BaseVCenterDeployApp,
     VCenterDeployVMRequestActions,
     VMFromImageDeployApp,
     VMFromLinkedCloneDeployApp,
@@ -125,6 +126,142 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
 
             request_actions = VCenterDeployVMRequestActions.from_request(request, api)
+            deploy_flow_class = get_deploy_flow(request_actions)
+            deploy_flow = deploy_flow_class(
+                resource_config=resource_config,
+                reservation_info=reservation_info,
+                vcenter_client=vcenter_client,
+                cs_api=api,
+                cancellation_manager=cancellation_manager,
+                logger=logger,
+            )
+            return deploy_flow.deploy(request_actions=request_actions)
+
+    @staticmethod
+    def _validate_deployment_path(
+        deploy_app: BaseVCenterDeployApp,
+        expected_deploy_app_cls: type[BaseVCenterDeployApp],
+        fn_name: str,
+    ):
+        if not isinstance(deploy_app, expected_deploy_app_cls):
+            raise ValueError(
+                f"Incorrect Deployment Path {deploy_app.DEPLOYMENT_PATH} for command "
+                f"{fn_name}"
+            )
+
+    def deploy_from_template(
+        self,
+        context: ResourceCommandContext,
+        request: str,
+        cancellation_context: CancellationContext,
+    ) -> str:
+        command_name = "Deploy From Template"
+        with LoggingSessionContext(context) as logger:
+            logger.info(f"Starting {command_name} command...")
+            logger.debug(f"Request: {request}")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            cancellation_manager = CancellationContextManager(cancellation_context)
+            reservation_info = ReservationInfo.from_resource_context(context)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+
+            request_actions = VCenterDeployVMRequestActions.from_request(request, api)
+            self._validate_deployment_path(
+                request_actions.deploy_app, VMFromTemplateDeployApp, command_name
+            )
+            deploy_flow_class = get_deploy_flow(request_actions)
+            deploy_flow = deploy_flow_class(
+                resource_config=resource_config,
+                reservation_info=reservation_info,
+                vcenter_client=vcenter_client,
+                cs_api=api,
+                cancellation_manager=cancellation_manager,
+                logger=logger,
+            )
+            return deploy_flow.deploy(request_actions=request_actions)
+
+    def deploy_clone_from_vm(
+        self,
+        context: ResourceCommandContext,
+        request: str,
+        cancellation_context: CancellationContext,
+    ) -> str:
+        command_name = "Deploy Clone From VM"
+        with LoggingSessionContext(context) as logger:
+            logger.info(f"Starting {command_name} command...")
+            logger.debug(f"Request: {request}")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            cancellation_manager = CancellationContextManager(cancellation_context)
+            reservation_info = ReservationInfo.from_resource_context(context)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+
+            request_actions = VCenterDeployVMRequestActions.from_request(request, api)
+            self._validate_deployment_path(
+                request_actions.deploy_app, VMFromVMDeployApp, command_name
+            )
+            deploy_flow_class = get_deploy_flow(request_actions)
+            deploy_flow = deploy_flow_class(
+                resource_config=resource_config,
+                reservation_info=reservation_info,
+                vcenter_client=vcenter_client,
+                cs_api=api,
+                cancellation_manager=cancellation_manager,
+                logger=logger,
+            )
+            return deploy_flow.deploy(request_actions=request_actions)
+
+    def deploy_from_linked_clone(
+        self,
+        context: ResourceCommandContext,
+        request: str,
+        cancellation_context: CancellationContext,
+    ) -> str:
+        command_name = "Deploy From Linked Clone"
+        with LoggingSessionContext(context) as logger:
+            logger.info(f"Starting {command_name} command...")
+            logger.debug(f"Request: {request}")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            cancellation_manager = CancellationContextManager(cancellation_context)
+            reservation_info = ReservationInfo.from_resource_context(context)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+
+            request_actions = VCenterDeployVMRequestActions.from_request(request, api)
+            self._validate_deployment_path(
+                request_actions.deploy_app, VMFromLinkedCloneDeployApp, command_name
+            )
+            deploy_flow_class = get_deploy_flow(request_actions)
+            deploy_flow = deploy_flow_class(
+                resource_config=resource_config,
+                reservation_info=reservation_info,
+                vcenter_client=vcenter_client,
+                cs_api=api,
+                cancellation_manager=cancellation_manager,
+                logger=logger,
+            )
+            return deploy_flow.deploy(request_actions=request_actions)
+
+    def deploy_from_image(
+        self,
+        context: ResourceCommandContext,
+        request: str,
+        cancellation_context: CancellationContext,
+    ) -> str:
+        command_name = "Deploy From Image"
+        with LoggingSessionContext(context) as logger:
+            logger.info(f"Starting {command_name} command...")
+            logger.debug(f"Request: {request}")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            cancellation_manager = CancellationContextManager(cancellation_context)
+            reservation_info = ReservationInfo.from_resource_context(context)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+
+            request_actions = VCenterDeployVMRequestActions.from_request(request, api)
+            self._validate_deployment_path(
+                request_actions.deploy_app, VMFromImageDeployApp, command_name
+            )
             deploy_flow_class = get_deploy_flow(request_actions)
             deploy_flow = deploy_flow_class(
                 resource_config=resource_config,
