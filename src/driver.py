@@ -7,6 +7,7 @@ from cloudshell.cp.vcenter.commands.command_orchestrator import CommandOrchestra
 from cloudshell.cp.vcenter.common.vcenter.model_auto_discovery import (
     VCenterAutoModelDiscovery,
 )
+from src.attrbiute_validator import ValidatorAttributes
 
 
 class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
@@ -204,3 +205,8 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
 
     def get_attribute_hints(self, context, request):
         return self.command_orchestrator.get_attribute_hints(context, request)
+
+    def validate_attributes(self, context, request):
+        attrs = ValidatorAttributes()
+        validate_request = attrs.parse_request(request)
+        return attrs.get_response(validate_request)

@@ -25,13 +25,13 @@ node_types:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
         Should be under the Default Datacenter."
-        tags: [user_input, enable_hints]
+        tags: []
       VM Storage:
         type: string
         description: "The vCenter storage in which the VMs will be created. The storage can be either a datastore or
         a datastore cluster. For example: datastore1 (To use a specific datastore inside a cluster, specify the
         cluster name and the datastore name. For example: clustername/datastore1)"
-        tags: [user_input, enable_hints]
+        tags: []
       Behavior during save:
         type: string
         description: "Determines the VM behavior when the sandbox is saved. If Power off is selected, and the VM
@@ -129,13 +129,13 @@ node_types:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
         Should be under the Default Datacenter."
-        tags: [user_input, enable_hints]
+        tags: []
       VM Storage:
         type: string
         description: "The vCenter storage in which the VMs will be created. The storage can be either a datastore
         or a datastore cluster. For example: datastore1 (To use a specific datastore inside a cluster,
         specify the cluster name and the datastore name. For example: clustername/datastore1)"
-        tags: [user_input, enable_hints]
+        tags: []
       Behavior during save:
         type: string
         description: "Determines the VM behavior when the sandbox is saved. If Power off is selected,
@@ -234,18 +234,18 @@ node_types:
         description: "The snapshot that will be used to clone a new VM. This snapshot should be associated
         with the VM defined in the vCenter VM input. Should include the full path of the snapshot,
         for example Snapshot1/Snapshot2"
-        tags: [user_input, editable_only_in_app_template]
+        tags: [user_input, editable_only_in_app_template, enable_hints]
       VM Cluster:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
         Should be under the Default Datacenter."
-        tags: [user_input, enable_hints]
+        tags: []
       VM Storage:
         type: string
         description: "The vCenter storage in which the VMs will be created. The storage can be either a datastore
         or a datastore cluster. For example: datastore1 (To use a specific datastore inside a cluster,
         specify the cluster name and the datastore name. For example: clustername/datastore1)"
-        tags: [user_input, enable_hints]
+        tags: []
       Behavior during save:
         type: string
         description: "Determines the VM behavior when the sandbox is saved. If Power off is selected, and the VM
@@ -354,13 +354,13 @@ node_types:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
         Should be under the Default Datacenter."
-        tags: [user_input, enable_hints]
+        tags: []
       VM Storage:
         type: string
         description: "The vCenter storage in which the VMs will be created. The storage can be either a datastore
         or a datastore cluster. For example: datastore1 (To use a specific datastore inside a cluster,
         specify the cluster name and the datastore name. For example: clustername/datastore1)"
-        tags: [user_input, enable_hints]
+        tags: []
       Behavior during save:
         type: string
         description: "Determines the VM behavior when the sandbox is saved. If Power off is selected, and the VM
