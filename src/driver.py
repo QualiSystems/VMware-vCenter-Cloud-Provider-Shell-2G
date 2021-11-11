@@ -16,7 +16,6 @@ from cloudshell.shell.flows.connectivity.parse_request_service import (
 )
 
 from cloudshell.cp.vcenter.api_client import VCenterAPIClient
-from cloudshell.cp.vcenter.commands.command_orchestrator import CommandOrchestrator
 from cloudshell.cp.vcenter.flows import (
     SnapshotFlow,
     VCenterAutoloadFlow,
@@ -65,7 +64,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         pass
 
     def __init__(self):
-        self.command_orchestrator = CommandOrchestrator()  # type: CommandOrchestrator
         for deploy_app_cls in (
             VMFromVMDeployApp,
             VMFromTemplateDeployApp,
