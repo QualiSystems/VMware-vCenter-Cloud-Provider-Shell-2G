@@ -4,6 +4,9 @@ import time
 from typing import TYPE_CHECKING
 
 from cloudshell.cp.core.cancellation_manager import CancellationContextManager
+from cloudshell.cp.core.request_actions.save_restore_app import (
+    SaveRestoreRequestActions,
+)
 from cloudshell.cp.core.reservation_info import ReservationInfo
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
@@ -15,16 +18,21 @@ from cloudshell.shell.flows.connectivity.parse_request_service import (
 from cloudshell.cp.vcenter.api_client import VCenterAPIClient
 from cloudshell.cp.vcenter.commands.command_orchestrator import CommandOrchestrator
 from cloudshell.cp.vcenter.flows import (
+    SnapshotFlow,
     VCenterAutoloadFlow,
     VCenterPowerFlow,
     delete_instance,
+    get_cluster_usage,
     get_deploy_flow,
+    get_vm_uuid_by_name,
+    get_vm_web_console,
+    reconfigure_vm,
     refresh_ip,
 )
 from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlow
+from cloudshell.cp.vcenter.flows.save_restore_app import SaveRestoreAppFlow
 from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
 from cloudshell.cp.vcenter.models.deploy_app import (
-    BaseVCenterDeployApp,
     VCenterDeployVMRequestActions,
     VMFromImageDeployApp,
     VMFromLinkedCloneDeployApp,
@@ -126,142 +134,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
 
             request_actions = VCenterDeployVMRequestActions.from_request(request, api)
-            deploy_flow_class = get_deploy_flow(request_actions)
-            deploy_flow = deploy_flow_class(
-                resource_config=resource_config,
-                reservation_info=reservation_info,
-                vcenter_client=vcenter_client,
-                cs_api=api,
-                cancellation_manager=cancellation_manager,
-                logger=logger,
-            )
-            return deploy_flow.deploy(request_actions=request_actions)
-
-    @staticmethod
-    def _validate_deployment_path(
-        deploy_app: BaseVCenterDeployApp,
-        expected_deploy_app_cls: type[BaseVCenterDeployApp],
-        fn_name: str,
-    ):
-        if not isinstance(deploy_app, expected_deploy_app_cls):
-            raise ValueError(
-                f"Incorrect Deployment Path {deploy_app.DEPLOYMENT_PATH} for command "
-                f"{fn_name}"
-            )
-
-    def deploy_from_template(
-        self,
-        context: ResourceCommandContext,
-        request: str,
-        cancellation_context: CancellationContext,
-    ) -> str:
-        command_name = "Deploy From Template"
-        with LoggingSessionContext(context) as logger:
-            logger.info(f"Starting {command_name} command...")
-            logger.debug(f"Request: {request}")
-            api = CloudShellSessionContext(context).get_api()
-            resource_config = VCenterResourceConfig.from_context(context, api=api)
-            cancellation_manager = CancellationContextManager(cancellation_context)
-            reservation_info = ReservationInfo.from_resource_context(context)
-            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
-
-            request_actions = VCenterDeployVMRequestActions.from_request(request, api)
-            self._validate_deployment_path(
-                request_actions.deploy_app, VMFromTemplateDeployApp, command_name
-            )
-            deploy_flow_class = get_deploy_flow(request_actions)
-            deploy_flow = deploy_flow_class(
-                resource_config=resource_config,
-                reservation_info=reservation_info,
-                vcenter_client=vcenter_client,
-                cs_api=api,
-                cancellation_manager=cancellation_manager,
-                logger=logger,
-            )
-            return deploy_flow.deploy(request_actions=request_actions)
-
-    def deploy_clone_from_vm(
-        self,
-        context: ResourceCommandContext,
-        request: str,
-        cancellation_context: CancellationContext,
-    ) -> str:
-        command_name = "Deploy Clone From VM"
-        with LoggingSessionContext(context) as logger:
-            logger.info(f"Starting {command_name} command...")
-            logger.debug(f"Request: {request}")
-            api = CloudShellSessionContext(context).get_api()
-            resource_config = VCenterResourceConfig.from_context(context, api=api)
-            cancellation_manager = CancellationContextManager(cancellation_context)
-            reservation_info = ReservationInfo.from_resource_context(context)
-            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
-
-            request_actions = VCenterDeployVMRequestActions.from_request(request, api)
-            self._validate_deployment_path(
-                request_actions.deploy_app, VMFromVMDeployApp, command_name
-            )
-            deploy_flow_class = get_deploy_flow(request_actions)
-            deploy_flow = deploy_flow_class(
-                resource_config=resource_config,
-                reservation_info=reservation_info,
-                vcenter_client=vcenter_client,
-                cs_api=api,
-                cancellation_manager=cancellation_manager,
-                logger=logger,
-            )
-            return deploy_flow.deploy(request_actions=request_actions)
-
-    def deploy_from_linked_clone(
-        self,
-        context: ResourceCommandContext,
-        request: str,
-        cancellation_context: CancellationContext,
-    ) -> str:
-        command_name = "Deploy From Linked Clone"
-        with LoggingSessionContext(context) as logger:
-            logger.info(f"Starting {command_name} command...")
-            logger.debug(f"Request: {request}")
-            api = CloudShellSessionContext(context).get_api()
-            resource_config = VCenterResourceConfig.from_context(context, api=api)
-            cancellation_manager = CancellationContextManager(cancellation_context)
-            reservation_info = ReservationInfo.from_resource_context(context)
-            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
-
-            request_actions = VCenterDeployVMRequestActions.from_request(request, api)
-            self._validate_deployment_path(
-                request_actions.deploy_app, VMFromLinkedCloneDeployApp, command_name
-            )
-            deploy_flow_class = get_deploy_flow(request_actions)
-            deploy_flow = deploy_flow_class(
-                resource_config=resource_config,
-                reservation_info=reservation_info,
-                vcenter_client=vcenter_client,
-                cs_api=api,
-                cancellation_manager=cancellation_manager,
-                logger=logger,
-            )
-            return deploy_flow.deploy(request_actions=request_actions)
-
-    def deploy_from_image(
-        self,
-        context: ResourceCommandContext,
-        request: str,
-        cancellation_context: CancellationContext,
-    ) -> str:
-        command_name = "Deploy From Image"
-        with LoggingSessionContext(context) as logger:
-            logger.info(f"Starting {command_name} command...")
-            logger.debug(f"Request: {request}")
-            api = CloudShellSessionContext(context).get_api()
-            resource_config = VCenterResourceConfig.from_context(context, api=api)
-            cancellation_manager = CancellationContextManager(cancellation_context)
-            reservation_info = ReservationInfo.from_resource_context(context)
-            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
-
-            request_actions = VCenterDeployVMRequestActions.from_request(request, api)
-            self._validate_deployment_path(
-                request_actions.deploy_app, VMFromImageDeployApp, command_name
-            )
             deploy_flow_class = get_deploy_flow(request_actions)
             deploy_flow = deploy_flow_class(
                 resource_config=resource_config,
@@ -411,95 +283,202 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
             resource = context.remote_endpoints[0]
-            actions = VCenterGetVMDetailsRequestActions.from_remote_resource(
-                resource, api
-            )
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
             delete_instance(
                 vcenter_client, actions.deployed_app, resource_config, logger
             )
 
-    def disconnect_all(self, context, ports):
-        return self.command_orchestrator.disconnect_all(context, ports)
+    def SaveApp(
+        self,
+        context: ResourceCommandContext,
+        request: str,
+        cancellation_context: CancellationContext,
+    ) -> str:
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Save App command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            cancellation_manager = CancellationContextManager(cancellation_context)
+            actions = SaveRestoreRequestActions.from_request(request)
+            return SaveRestoreAppFlow(
+                vcenter_client, resource_config, api, cancellation_manager, logger
+            ).save_apps(actions.save_app_actions)
 
-    def disconnect(self, context, ports, network_name):
-        return self.command_orchestrator.disconnect(context, ports, network_name)
+    def DeleteSavedApps(
+        self,
+        context: ResourceCommandContext,
+        request: str,
+        cancellation_context: CancellationContext,
+    ):
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Delete Saved App command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            cancellation_manager = CancellationContextManager(cancellation_context)
+            actions = SaveRestoreRequestActions.from_request(request)
+            return SaveRestoreAppFlow(
+                vcenter_client, resource_config, api, cancellation_manager, logger
+            ).delete_saved_apps(actions.delete_saved_app_actions)
 
-    def SaveApp(self, context, request, cancellation_context=None):
-        actions = self.request_parser.convert_driver_request_to_actions(request)
-        save_actions = [x for x in actions if isinstance(x, SaveApp)]  # noqa
-        save_app_results = self.command_orchestrator.save_sandbox(
-            context, save_actions, cancellation_context
-        )
-        return DriverResponse(save_app_results).to_driver_response_json()  # noqa
+    def remote_save_snapshot(
+        self,
+        context: ResourceRemoteCommandContext,
+        ports: list[str],
+        snapshot_name: str,
+        save_memory: str,
+    ) -> str:
+        """Saves virtual machine to a snapshot."""
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Remote Save Snapshot command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            resource = context.remote_endpoints[0]
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
+            return SnapshotFlow(
+                vcenter_client,
+                resource_config,
+                actions.deployed_app,
+                logger,
+            ).save_snapshot(snapshot_name, save_memory)
 
-    def DeleteSavedApps(self, context, request, cancellation_context=None):
-        actions = self.request_parser.convert_driver_request_to_actions(request)
-        delete_actions = [x for x in actions if isinstance(x, DeleteSavedApp)]  # noqa
-        save_app_results = self.command_orchestrator.delete_saved_sandbox(
-            context, delete_actions, cancellation_context
-        )
-        return DriverResponse(save_app_results).to_driver_response_json()  # noqa
+    def remote_restore_snapshot(
+        self,
+        context: ResourceRemoteCommandContext,
+        ports: list[str],
+        snapshot_name: str,
+    ):
+        """Restores virtual machine from a snapshot."""
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Remote Restore Snapshot command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            resource = context.remote_endpoints[0]
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
+            return SnapshotFlow(
+                vcenter_client,
+                resource_config,
+                actions.deployed_app,
+                logger,
+            ).restore_from_snapshot(api, snapshot_name)
 
-    def remote_save_snapshot(self, context, ports, snapshot_name, save_memory):
-        """Saves virtual machine to a snapshot.
+    def remote_get_snapshots(
+        self, context: ResourceRemoteCommandContext, ports: list[str]
+    ) -> str:
+        """Returns list of snapshots."""
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Remote Get Snapshots command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            resource = context.remote_endpoints[0]
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
+            return SnapshotFlow(
+                vcenter_client,
+                resource_config,
+                actions.deployed_app,
+                logger,
+            ).get_snapshot_paths()
 
-        :param context: resource context of the vCenterShell
-        :type context: models.QualiDriverModels.ResourceCommandContext
-        :param ports:list[string] ports: the ports of the connection between the
-        remote resource and the local resource
-        :type ports: list[string]
-        :param snapshot_name: snapshot name to save to
-        :type snapshot_name: str
-        :param save_memory: Snapshot the virtual machine's memory. Lookup, Yes / No
-        :type save_memory: str
-        :return:
-        """
-        return self.command_orchestrator.save_snapshot(
-            context, snapshot_name, save_memory
-        )
+    def orchestration_save(
+        self,
+        context: ResourceRemoteCommandContext,
+        ports: list[str],
+        mode: str = "shallow",
+        custom_params=None,
+    ) -> str:
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Orchestration Save command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            resource = context.remote_endpoints[0]
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
+            return SnapshotFlow(
+                vcenter_client,
+                resource_config,
+                actions.deployed_app,
+                logger,
+            ).orchestration_save()
 
-    def remote_restore_snapshot(self, context, ports, snapshot_name):
-        """Restores virtual machine from a snapshot.
+    def orchestration_restore(
+        self,
+        context: ResourceRemoteCommandContext,
+        ports: list[str],
+        saved_details: str,
+    ):
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Orchestration Restore command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            resource = context.remote_endpoints[0]
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
+            return SnapshotFlow(
+                vcenter_client,
+                resource_config,
+                actions.deployed_app,
+                logger,
+            ).orchestration_restore(saved_details, api)
 
-        :param context: resource context of the vCenterShell
-        :type context: models.QualiDriverModels.ResourceCommandContext
-        :param ports:list[string] ports: the ports of the connection between
-        the remote resource and the local resource
-        :type ports: list[string]
-        :param snapshot_name: Snapshot name to restore from
-        :type snapshot_name: str
-        :return:
-        """
-        return self.command_orchestrator.restore_snapshot(context, snapshot_name)
+    def get_vm_uuid(self, context: ResourceCommandContext, vm_name: str) -> str:
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Get VM UUID command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            return get_vm_uuid_by_name(vcenter_client, resource_config, vm_name, logger)
 
-    def remote_get_snapshots(self, context, ports):
-        """Returns list of snapshots.
+    def get_cluster_usage(
+        self, context: ResourceCommandContext, datastore_name: str
+    ) -> str:
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Get Cluster Usage command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            return get_cluster_usage(
+                vcenter_client, resource_config, datastore_name, logger
+            )
 
-        :param context: resource context of the vCenterShell
-        :type context: models.QualiDriverModels.ResourceCommandContext
-        :param ports:list[string] ports: the ports of the connection between
-        the remote resource and the local resource
-        :type ports: list[string]
-        :return: list
-        """
-        return self.command_orchestrator.get_snapshots(context)
+    def reconfigure_vm(
+        self,
+        context: ResourceRemoteCommandContext,
+        ports: list[str],
+        cpu: str,
+        ram: str,
+        hdd: str,
+    ):
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Reconfigure VM command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            resource = context.remote_endpoints[0]
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
+            reconfigure_vm(
+                vcenter_client,
+                resource_config,
+                actions.deployed_app,
+                cpu,
+                ram,
+                hdd,
+                logger,
+            )
 
-    def orchestration_save(self, context, ports, mode="shallow", custom_params=None):
-        return self.command_orchestrator.orchestration_save(
-            context, mode, custom_params
-        )
-
-    def orchestration_restore(self, context, ports, saved_details):
-        return self.command_orchestrator.orchestration_restore(context, saved_details)
-
-    def get_vm_uuid(self, context, vm_name):
-        return self.command_orchestrator.get_vm_uuid_by_name(context, vm_name)
-
-    def get_cluster_usage(self, context, datastore_name):
-        return self.command_orchestrator.get_cluster_usage(context, datastore_name)
-
-    def reconfigure_vm(self, context, ports, cpu, ram, hdd):
-        return self.command_orchestrator.reconfigure_vm(context, cpu, ram, hdd)
-
-    def get_vm_web_console(self, context, ports):
-        return self.command_orchestrator.get_vm_web_console(context)
+    def get_vm_web_console(
+        self, context: ResourceRemoteCommandContext, ports: list[str]
+    ) -> str:
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Get VM WEB Console command...")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            vcenter_client = VCenterAPIClient.from_config(resource_config, logger)
+            resource = context.remote_endpoints[0]
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
+            return get_vm_web_console(
+                vcenter_client, resource_config, actions.deployed_app, logger
+            )
