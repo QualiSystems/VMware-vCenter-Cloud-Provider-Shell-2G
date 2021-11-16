@@ -411,9 +411,9 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         self,
         context: ResourceRemoteCommandContext,
         ports: list[str],
-        cpu: str,
-        ram: str,
-        hdd: str,
+        cpu: str | None,
+        ram: str | None,
+        hdd: str | None,
     ):
         with LoggingSessionContext(context) as logger:
             logger.info("Starting Reconfigure VM command")
