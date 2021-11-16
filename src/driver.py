@@ -262,7 +262,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            delete_instance(actions.deployed_app, resource_config, logger)
+            reservation_info = ReservationInfo.from_resource_context(context)
+            delete_instance(
+                actions.deployed_app, resource_config, reservation_info, logger
+            )
 
     def SaveApp(
         self,
