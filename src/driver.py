@@ -55,6 +55,7 @@ if TYPE_CHECKING:
         InitCommandContext,
         ResourceCommandContext,
         ResourceRemoteCommandContext,
+        UnreservedResourceCommandContext,
     )
 
 
@@ -285,10 +286,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
 
     def DeleteSavedApps(
         self,
-        context: ResourceCommandContext,
+        context: UnreservedResourceCommandContext,
         request: str,
         cancellation_context: CancellationContext,
-    ):
+    ) -> str:
         with LoggingSessionContext(context) as logger:
             logger.info("Starting Delete Saved App command")
             api = CloudShellSessionContext(context).get_api()
