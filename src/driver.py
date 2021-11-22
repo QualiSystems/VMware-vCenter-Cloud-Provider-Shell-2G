@@ -356,6 +356,24 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 logger,
             ).get_snapshot_paths()
 
+    def remote_remove_snapshot(
+        self,
+        context: ResourceRemoteCommandContext,
+        ports: list[str],
+        snapshot_name: str,
+    ):
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Remote Remove Snapshot command")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            resource = context.remote_endpoints[0]
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
+            return SnapshotFlow(
+                resource_config,
+                actions.deployed_app,
+                logger,
+            ).remove_snapshot(snapshot_name)
+
     def orchestration_save(
         self,
         context: ResourceRemoteCommandContext,

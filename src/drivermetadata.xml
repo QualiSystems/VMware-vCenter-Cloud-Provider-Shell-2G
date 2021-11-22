@@ -25,6 +25,11 @@
                     <Parameter DefaultValue="" Description="Please enter the full path of the VM snapshot, for example Snapshot1/Snapshot2." DisplayName="Snapshot Name" Mandatory="True" Name="snapshot_name" Type="String" />
                 </Parameters>
             </Command>
+            <Command Description="" DisplayName="Remove Snapshot" Name="remote_remove_snapshot" Tags="remote_connectivity,allow_unreserved">
+                <Parameters>
+                    <Parameter DefaultValue="" Description="Please enter the full path of the VM snapshot, for example Snapshot1/Snapshot2." DisplayName="Snapshot Name" Mandatory="True" Name="snapshot_name" Type="String" />
+                </Parameters>
+            </Command>
             <Command Description="" DisplayName="Get Snapshots" Name="remote_get_snapshots" Tags="remote_connectivity,allow_unreserved" />
             <Command Description="" DisplayName="Delete Saved Apps" EnableCancellation="true" Name="DeleteSavedApps" Tags="allow_unreserved">
             </Command>
