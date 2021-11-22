@@ -22,6 +22,7 @@ from cloudshell.cp.vcenter.flows import (
     delete_instance,
     get_cluster_usage,
     get_deploy_flow,
+    get_hints,
     get_vm_uuid_by_name,
     get_vm_web_console,
     reconfigure_vm,
@@ -441,3 +442,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
             return get_vm_web_console(resource_config, actions.deployed_app, logger)
+
+    def get_attribute_hints(self, context: ResourceCommandContext, request: str) -> str:
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Get attribute hints command")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            return get_hints(resource_config, request, logger)
