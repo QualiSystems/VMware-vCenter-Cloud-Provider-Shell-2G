@@ -27,6 +27,7 @@ from cloudshell.cp.vcenter.flows import (
     get_vm_web_console,
     reconfigure_vm,
     refresh_ip,
+    validate_attributes,
 )
 from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlow
 from cloudshell.cp.vcenter.flows.save_restore_app import SaveRestoreAppFlow
@@ -467,3 +468,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             return get_hints(resource_config, request, logger)
+
+    def validate_attributes(self, context: ResourceCommandContext, request: str) -> str:
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Validate attributes command")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            return validate_attributes(resource_config, request, logger)
