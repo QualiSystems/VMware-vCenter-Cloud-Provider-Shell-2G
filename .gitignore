@@ -65,3 +65,6 @@ cloudshell_config.yml
 src/check_vcenter.py
 src/_test.py
 src/__init__.py
+
+/venv
+/tesrrr.py
