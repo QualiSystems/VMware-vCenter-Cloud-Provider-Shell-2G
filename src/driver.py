@@ -243,12 +243,14 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             logger.info("Starting Apply Connectivity Changes command")
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
+            reservation_info = ReservationInfo.from_resource_context(context)
             # todo check
             parse_connectivity_req_service = ParseConnectivityRequestService(
                 is_vlan_range_supported=True, is_multi_vlan_supported=True
             )
             return VCenterConnectivityFlow(
                 resource_config,
+                reservation_info,
                 parse_connectivity_req_service,
                 logger,
             ).apply_connectivity(request)
