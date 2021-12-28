@@ -20,7 +20,7 @@ node_types:
         type: string
         description: "vCenter VM to use in the VM creation. Should include the full path
         and the vm name, for example QualiFolder/VM121"
-        tags: [user_input, editable_only_in_app_template, enable_hints]
+        tags: [user_input, editable_only_in_app_template]
       VM Cluster:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
@@ -133,7 +133,7 @@ node_types:
         type: string
         description: "vCenter VM template to use in the VM creation. Should include the full path and
         the template name, for example QualiFolder/Template1"
-        tags: [user_input, editable_only_in_app_template, enable_hints]
+        tags: [user_input, editable_only_in_app_template]
       VM Cluster:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
@@ -243,13 +243,13 @@ node_types:
         type: string
         description: "vCenter VM to use in the VM creation. Should include the full path
         and the vm name, for example QualiFolder/VM121"
-        tags: [user_input, editable_only_in_app_template, enable_hints]
+        tags: [user_input, editable_only_in_app_template]
       vCenter VM Snapshot:
         type: string
         description: "The snapshot that will be used to clone a new VM. This snapshot should be associated
         with the VM defined in the vCenter VM input. Should include the full path of the snapshot,
         for example Snapshot1/Snapshot2"
-        tags: [user_input, editable_only_in_app_template, enable_hints]
+        tags: [user_input, editable_only_in_app_template]
       VM Cluster:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
