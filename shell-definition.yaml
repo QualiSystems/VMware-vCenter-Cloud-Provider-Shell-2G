@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 metadata:
   template_name: VMware vCenter Cloud Provider Shell 2G
   template_author: Quali
-  template_version: 4.0.6
+  template_version: 4.0.0
   template_icon: shell-icon.png
 
 description: >
@@ -16,13 +16,13 @@ node_types:
  vendor.resource.VMware vCenter Cloud Provider 2G:
     derived_from: cloudshell.nodes.CustomCloudProvider
     capabilities:
-    
+
       concurrent_command_capability:
         type: cloudshell.capabilities.SupportConcurrentCommands
-        
+
       auto_discovery_capability:
         type: cloudshell.capabilities.AutoDiscovery
-        properties:        
+        properties:
           enable_auto_discovery:
             type: boolean
             default: true
