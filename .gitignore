@@ -59,5 +59,12 @@ docs/_build/
 target/
 cloudshell_config.yml
 
+.idea/
+
 # Test file
 src/check_vcenter.py
+src/_test.py
+src/__init__.py
+
+/venv
+/tesrrr.py
