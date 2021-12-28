@@ -5,10 +5,12 @@ on:
     paths-ignore:
       - "README.md"
       - "docs/readme.md"
+      - "docs/readme.rst"
   pull_request:
     paths-ignore:
       - "README.md"
       - "docs/readme.md"
+      - "docs/readme.rst"
   release:
     types: [published]
 

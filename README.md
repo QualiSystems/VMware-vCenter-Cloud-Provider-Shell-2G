@@ -15,6 +15,7 @@ Release date: May 2021
 * [Importing and Configuring the Shell](#importing-and-configuring-the-shell)
 * [Updating Python Dependencies for Shells](#updating-python-dependencies-for-shells)
 * [Typical Workflows](#typical-workflows)
+* [Workarounds](#workarounds)
 * [References](#references)
 * [Release Notes](#release-notes)
 
@@ -116,7 +117,7 @@ This section describes how to import the VMware vCenter Cloud Provider Shell 2G 
   
   3. Click **Import**.
   
-  4. In the dialog box, navigate to the shell's zip package, select it and click **Open**. <br><br>The shell is displayed in the **Shells** page and can be used by domain administrators in all CloudShell domains to create new inventory resources, as explained in [Adding Inventory Resources](http://help.quali.com/Online%20Help/9.0/Portal/Content/CSP/INVN/Add-Rsrc-Tmplt.htm?Highlight=adding%20inventory%20resources). 
+  4. In the dialog box, navigate to the shell's zip package, select it and click **Open**. <br><br>The shell is displayed in the **Shells** page and can be used by domain administrators in all CloudShell domains to create new inventory resources, as explained in [Adding Inventory Resources](http://help.quali.com/Online%20Help/0.0/Portal/Content/CSP/INVN/Add-Rsrc-Tmplt.htm?Highlight=adding%20inventory%20resources). 
 
 ### Offline installation of a shell
 
@@ -133,10 +134,10 @@ In offline mode, import the shell into CloudShell and place any dependencies in 
 ### Adding shell and script packages to the local PyPi Server repository
 If your Quali Server and/or execution servers work offline, you will need to copy all required Python packages, including the out-of-the-box ones, to the PyPi Server's repository on the Quali Server computer (by default *C:\Program Files (x86)\QualiSystems\CloudShell\Server\Config\Pypi Server Repository*).
 
-For more information, see [Configuring CloudShell to Execute Python Commands in Offline Mode](http://help.quali.com/Online%20Help/9.0/Portal/Content/Admn/Cnfgr-Pyth-Env-Wrk-Offln.htm?Highlight=Configuring%20CloudShell%20to%20Execute%20Python%20Commands%20in%20Offline%20Mode).
+For more information, see [Configuring CloudShell to Execute Python Commands in Offline Mode](http://help.quali.com/Online%20Help/0.0/Portal/Content/Admn/Cnfgr-Pyth-Env-Wrk-Offln.htm?Highlight=Configuring%20CloudShell%20to%20Execute%20Python%20Commands%20in%20Offline%20Mode).
 
 **To add Python packages to the local PyPi Server repository:**
-  1. If you haven't created and configured the local PyPi Server repository to work with the execution server, perform the steps in [Add Python packages to the local PyPi Server repository (offline mode)](http://help.quali.com/Online%20Help/9.0/Portal/Content/Admn/Cnfgr-Pyth-Env-Wrk-Offln.htm?Highlight=offline%20dependencies#Add). 
+  1. If you haven't created and configured the local PyPi Server repository to work with the execution server, perform the steps in [Add Python packages to the local PyPi Server repository (offline mode)](http://help.quali.com/Online%20Help/0.0/Portal/Content/Admn/Cnfgr-Pyth-Env-Wrk-Offln.htm?Highlight=offline%20dependencies#Add). 
   
   2. For each shell or script you add into CloudShell, do one of the following (from an online computer):
       * Connect to the Internet and download each dependency specified in the *requirements.txt* file with the following command: 
@@ -152,7 +153,7 @@ This section explains how to create a new resource from the shell.
 
 In CloudShell, the component that models the device is called a resource. It is based on the shell that models the device and allows the CloudShell user and API to remotely control the device from CloudShell.
 
-You can also modify existing resources, see [Managing Resources in the Inventory](http://help.quali.com/Online%20Help/9.0/Portal/Content/CSP/INVN/Mng-Rsrc-in-Invnt.htm?Highlight=managing%20resources).
+You can also modify existing resources, see [Managing Resources in the Inventory](http://help.quali.com/Online%20Help/0.0/Portal/Content/CSP/INVN/Mng-Rsrc-in-Invnt.htm?Highlight=managing%20resources).
 
 **To create a resource for the device:**  
   1. In the CloudShell Portal, in the **Inventory** dashboard, click **Add New**.
@@ -189,17 +190,38 @@ This section explains how to update your Python dependencies folder. This is req
 
 2. Extract the zip file to the suitable offline package folder(s). 
 
-3. Terminate the shell’s instance, as explained [here](http://help.quali.com/Online%20Help/9.0/Portal/Content/CSP/MNG/Mng-Exctn-Srv-Exct.htm#Terminat). 
+3. Terminate the shell’s instance, as explained [here](http://help.quali.com/Online%20Help/0.0/Portal/Content/CSP/MNG/Mng-Exctn-Srv-Exct.htm#Terminat). 
 
 ### Updating online Python dependencies
 In online mode, the execution server automatically downloads and extracts the appropriate dependencies file to the online Python dependencies repository every time a new instance of the driver or script is created.
 
 **To update online Python dependencies:**
-* If there is a live instance of the shell's driver or script, terminate the shell’s instance, as explained [here](http://help.quali.com/Online%20Help/9.0/Portal/Content/CSP/MNG/Mng-Exctn-Srv-Exct.htm#Terminat). If an instance does not exist, the execution server will download the Python dependencies the next time a command of the driver or script runs.
+* If there is a live instance of the shell's driver or script, terminate the shell’s instance, as explained [here](http://help.quali.com/Online%20Help/0.0/Portal/Content/CSP/MNG/Mng-Exctn-Srv-Exct.htm#Terminat). If an instance does not exist, the execution server will download the Python dependencies the next time a command of the driver or script runs.
 
 # Typical Workflows
 
-## **Workflow 1 - Rename HHD attribute to HDD** 
+## Connect vCenter Apps to an existing VLAN port group
+Using the vCenter 2nd Gen shell, it is possible to connect an App or deployed App to an existing port group. This enables you to connect deployed Apps in different sandboxes and also to connect Apps deployed in a sandbox to static VMs on the vCenter server.
+
+__Note__: This capability is supported only for vCenter Apps and applies to port groups created on the datacenter defined on the vCenter cloud provider resource.
+For illustration purposes, the below procedure assumes you want to connect an App to port group "QS_vSwitch1_VLAN_100_Access".
+
+__To connect an App to an existing port group:__
+1. Download the _vCenter.VLAN.Port.Group.zip_ file from the vCenter 2G shell's Integrations [page](https://community.quali.com/repos/5386/vmware-vcenter-cloud-provider-shell-2g).
+2. Import the ZIP file into CloudShell Portal.
+3. Open the blueprint or sandbox. 
+4. From the __App / Service__ pane, drag the new __vCenter VLAN Port Group__ service into the diagram.
+5. Set the service's details:
+   - __Port Group Name__: Full port group name. For example: "QS_vSwitch1_VLAN_100_Access".
+   - __VLAN ID__: Port group's VLAN ID. For example: "100".
+6. Click __Add__.
+7. Create connection requirements between the vCenter Apps and the service.
+8. Deploy the connection(s), as appropriate. 
+9. <br>The connection is created like with any other VLAN service. This includes by deploying the App, connecting the purple Connector line if the App is already deployed, and reserving the blueprint.
+
+# Workarounds
+
+## **Rename HHD attribute to HDD** 
 
 When using vCenter 2G Shell version 2.0.0 and 2.2.0, the App deployment types include an attribute that is incorrectly named "HHD" instead of "HDD". The below procedure explains how to fix this issue, which is done in CloudShell’s SQL Server’s _Quali_ database.
   ![Image][3]
@@ -242,25 +264,6 @@ update AttributeInfo set Name = 'VMware vCenter Cloud Provider 2G.vCenter VM Fro
 
 6. To verify, go to CloudShell Portal’s __Manage>Apps__ page. Open an App template that uses a vCenter 2G Shell resource. Make sure the vCenter 2G deployment types include the __HDD__ attribute:
 ![Image][9]
-
-## Workflow 2 - Connect vCenter Apps to an existing VLAN port group
-Using the vCenter 2nd Gen shell, it is possible to connect an App or deployed App to an existing port group. This enables you to connect deployed Apps in different sandboxes and also to connect Apps deployed in a sandbox to static VMs on the vCenter server.
-
-__Note__: This capability is supported only for vCenter Apps and applies to port groups created on the datacenter defined on the vCenter cloud provider resource.
-For illustration purposes, the below procedure assumes you want to connect an App to port group "QS_vSwitch1_VLAN_100_Access".
-
-__To connect an App to an existing port group:__
-1. Download the _vCenter.VLAN.Port.Group.zip_ file from the vCenter 2G shell's Integrations [page](https://community.quali.com/repos/5386/vmware-vcenter-cloud-provider-shell-2g).
-2. Import the ZIP file into CloudShell Portal.
-3. Open the blueprint or sandbox. 
-4. From the __App / Service__ pane, drag the new __vCenter VLAN Port Group__ service into the diagram.
-5. Set the service's details:
-   - __Port Group Name__: Full port group name. For example: "QS_vSwitch1_VLAN_100_Access".
-   - __VLAN ID__: Port group's VLAN ID. For example: "100".
-6. Click __Add__.
-7. Create connection requirements between the vCenter Apps and the service.
-8. Deploy the connection(s), as appropriate. 
-9. <br>The connection is created like with any other VLAN service. This includes by deploying the App, connecting the purple Connector line if the App is already deployed, and reserving the blueprint.
 
 # References
 To download and share integrations, see [Quali Community's Integrations](https://community.quali.com/integrations). 
