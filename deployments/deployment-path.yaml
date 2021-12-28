@@ -54,7 +54,7 @@ node_types:
         type: boolean
         description: "Enables the automatic power on of an app following its deployment during reservation Setup."
         default: true
-        tags: []
+        tags: [user_input]
       Auto Power Off:
         type: boolean
         description: "Enables the automatic power off of an app during reservation Teardown."
@@ -64,7 +64,7 @@ node_types:
         type: boolean
         description: "If set to False the deployment will not wait for the VM to get an IP."
         default: true
-        tags: []
+        tags: [user_input]
       Auto Delete:
         type: boolean
         description: "Enables automatic deletion of an app during reservation Teardown."
@@ -167,7 +167,7 @@ node_types:
         type: boolean
         description: "Enables the automatic power on of an app following its deployment during reservation Setup."
         default: true
-        tags: []
+        tags: [user_input]
       Auto Power Off:
         type: boolean
         description: "Enables the automatic power off of an app during reservation Teardown."
@@ -177,7 +177,7 @@ node_types:
         type: boolean
         description: "If set to False the deployment will not wait for the VM to get an IP."
         default: true
-        tags: []
+        tags: [user_input]
       Auto Delete:
         type: boolean
         description: "Enables automatic deletion of an app during reservation Teardown."
@@ -283,7 +283,7 @@ node_types:
         type: boolean
         description: "Enables the automatic power on of an app following its deployment during reservation Setup."
         default: true
-        tags: []
+        tags: [user_input]
       Auto Power Off:
         type: boolean
         description: "Enables the automatic power off of an app during reservation Teardown."
@@ -293,7 +293,7 @@ node_types:
         type: boolean
         description: "If set to False the deployment will not wait for the VM to get an IP."
         default: true
-        tags: []
+        tags: [user_input]
       Auto Delete:
         type: boolean
         description: "Enables automatic deletion of an app during reservation Teardown."
@@ -404,7 +404,7 @@ node_types:
         type: boolean
         description: "Enables the automatic power on of an app following its deployment during reservation Setup."
         default: true
-        tags: []
+        tags: [user_input]
       Auto Power Off:
         type: boolean
         description: "Enables the automatic power off of an app during reservation Teardown."
@@ -414,7 +414,7 @@ node_types:
         type: boolean
         description: "If set to False the deployment will not wait for the VM to get an IP."
         default: true
-        tags: []
+        tags: [user_input]
       Auto Delete:
         type: boolean
         description: "Enables automatic deletion of an app during reservation Teardown."
