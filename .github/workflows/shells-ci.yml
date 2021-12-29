@@ -87,6 +87,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+          architecture: "x86"
       - name: Download dependencies
         run: |
           python -m pip install pip -U
