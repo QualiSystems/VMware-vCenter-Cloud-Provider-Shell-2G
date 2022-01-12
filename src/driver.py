@@ -40,6 +40,7 @@ from cloudshell.cp.vcenter.models.deploy_app import (
     VMFromVMDeployApp,
 )
 from cloudshell.cp.vcenter.models.deployed_app import (
+    StaticVCenterDeployedApp,
     VCenterDeployedVMActions,
     VCenterGetVMDetailsRequestActions,
     VMFromImageDeployedApp,
@@ -79,6 +80,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             VMFromTemplateDeployedApp,
             VMFromLinkedCloneDeployedApp,
             VMFromImageDeployedApp,
+            StaticVCenterDeployedApp,
         ):
             VCenterDeployedVMActions.register_deployment_path(deployed_app_cls)
 
