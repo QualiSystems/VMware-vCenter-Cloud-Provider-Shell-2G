@@ -4,9 +4,9 @@
 
 Release date: May 2021
 
-`Shell version: 3.3.0`
+`Shell version: 4.1.0`
 
-`Document version: 1.0`
+`Document version: 2.0`
 
 # In This Guide
 
@@ -48,7 +48,7 @@ For detailed information about the shell’s structure and attributes, see the [
 
 Release: VMware vCenter Cloud Provider Shell 2G
 
-▪ CloudShell version **2020.2 and above**
+▪ CloudShell version **2022.1 and above**
 
 **Notes:** 
 * **Save/Restore Sandbox** support for vCenter Shell 2G is available in ClousdShell **2021.1 P1 and above**.
