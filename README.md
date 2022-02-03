@@ -2,7 +2,7 @@
 
 # **VMware vCenter Cloud Provider Shell 2G**
 
-Release date: May 2021
+Release date: February 2022
 
 `Shell version: 4.1.0`
 
