@@ -30,6 +30,7 @@ from cloudshell.cp.vcenter.flows import (
     validate_attributes,
 )
 from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlow
+from cloudshell.cp.vcenter.flows.customize_guest_os import customize_guest_os
 from cloudshell.cp.vcenter.flows.save_restore_app import SaveRestoreAppFlow
 from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
 from cloudshell.cp.vcenter.models.deploy_app import (
@@ -479,3 +480,26 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             return validate_attributes(resource_config, request, logger)
+
+    def customize_guest_os(
+        self,
+        context: ResourceRemoteCommandContext,
+        ports: list[str],
+        custom_spec_name: str,
+        custom_spec_params: str,
+        override_custom_spec: bool,
+    ):
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Customize Guest OS command")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            resource = context.remote_endpoints[0]
+            actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
+            return customize_guest_os(
+                resource_config,
+                actions.deployed_app,
+                custom_spec_name,
+                custom_spec_params,
+                override_custom_spec,
+                logger,
+            )
