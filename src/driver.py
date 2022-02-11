@@ -367,6 +367,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         context: ResourceRemoteCommandContext,
         ports: list[str],
         snapshot_name: str,
+        remove_child: str,
     ):
         with LoggingSessionContext(context) as logger:
             logger.info("Starting Remote Remove Snapshot command")
@@ -378,7 +379,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 resource_config,
                 actions.deployed_app,
                 logger,
-            ).remove_snapshot(snapshot_name)
+            ).remove_snapshot(snapshot_name, remove_child)
 
     def orchestration_save(
         self,
