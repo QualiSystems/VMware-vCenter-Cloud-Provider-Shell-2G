@@ -198,4 +198,4 @@ jobs:
           draft: true
           name: ${{ env.REPO }} ${{ env.TAG }}
           tag: ${{ env.TAG }}
-          commit: master
+          commit: master-5.x.x
