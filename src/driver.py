@@ -33,6 +33,9 @@ from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlo
 from cloudshell.cp.vcenter.flows.customize_guest_os import customize_guest_os
 from cloudshell.cp.vcenter.flows.save_restore_app import SaveRestoreAppFlow
 from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
+from cloudshell.cp.vcenter.models.connectivity_action_model import (
+    VcenterConnectivityActionModel,
+)
 from cloudshell.cp.vcenter.models.deploy_app import (
     VCenterDeployVMRequestActions,
     VMFromImageDeployApp,
@@ -247,9 +250,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             reservation_info = ReservationInfo.from_resource_context(context)
-            # todo check
             parse_connectivity_req_service = ParseConnectivityRequestService(
-                is_vlan_range_supported=True, is_multi_vlan_supported=True
+                is_vlan_range_supported=True,
+                is_multi_vlan_supported=True,
+                connectivity_model_cls=VcenterConnectivityActionModel,
             )
             return VCenterConnectivityFlow(
                 resource_config,
