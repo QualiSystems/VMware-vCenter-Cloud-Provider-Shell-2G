@@ -70,6 +70,9 @@ node_types:
           Promiscuous Mode:
             type: boolean
             default: true
+          Add Tags:
+            type: boolean
+            default: true
 
     properties:
       User:
@@ -119,6 +122,10 @@ node_types:
       Promiscuous Mode:
         type: boolean
         description: "If enabled the port groups on the virtual switch will be configured to allow promiscuous mode."
+      Add Tags:
+        type: boolean
+        default: true
+        description: "If enabled tags will be added on the new objects created by the Shell - folders, networks, VMs."
 
     artifacts:
       icon:
