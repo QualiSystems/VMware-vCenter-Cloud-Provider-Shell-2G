@@ -70,7 +70,7 @@ node_types:
           Promiscuous Mode:
             type: boolean
             default: true
-          Add Tags:
+          Enable Tags:
             type: boolean
             default: true
 
