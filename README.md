@@ -281,6 +281,10 @@ To connect with Quali users and experts from around the world, ask questions and
 For release updates, see the shell's [GitHub releases page](https://github.com/QualiSystems/VMware-vCenter-Cloud-Provider-Shell-2G/releases).
 
 
+# Known Issues
+1. On vCenter 7 there's an issues with adding tags. [vCenter ticket](https://communities.vmware.com/t5/VMware-vCenter-Discussions/vCLS-VM-setting-tag-fails-with-error/td-p/2854068).
+
+
 [1]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/cloudshell_logo.png
 [2]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/create_a_resource_device.png
 [3]: https://github.com/QualiSystems/cloudshell-shells-documentaion-templates/blob/master/vCenter%20App%20HHD.png
