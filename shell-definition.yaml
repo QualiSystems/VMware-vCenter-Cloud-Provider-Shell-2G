@@ -125,7 +125,9 @@ node_types:
       Add Tags:
         type: boolean
         default: true
-        description: "If enabled tags will be added on the new objects created by the Shell - folders, networks, VMs."
+        description: "If enabled tags will be added to the new objects created by the 
+        Shell - folders, networks, VMs, etc. Note: Shell supports adding tags on 
+        vCenter 6.5 and above."
 
     artifacts:
       icon:
