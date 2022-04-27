@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 metadata:
   template_name: VMware vCenter Cloud Provider Shell 2G
   template_author: Quali
-  template_version: 5.0.1
+  template_version: 5.0.2
   template_icon: shell-icon.png
 
 description: >
@@ -70,6 +70,9 @@ node_types:
           Promiscuous Mode:
             type: boolean
             default: true
+          Enable Tags:
+            type: boolean
+            default: true
 
     properties:
       User:
@@ -119,6 +122,12 @@ node_types:
       Promiscuous Mode:
         type: boolean
         description: "If enabled the port groups on the virtual switch will be configured to allow promiscuous mode."
+      Enable Tags:
+        type: boolean
+        default: true
+        description: "If enabled tags will be added to the new objects created by the 
+        Shell - folders, networks, VMs, etc. Note: Shell supports adding tags on 
+        vCenter 6.5 and above."
 
     artifacts:
       icon:
