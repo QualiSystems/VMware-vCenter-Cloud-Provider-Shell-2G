@@ -212,7 +212,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
             cancellation_manager = CancellationContextManager(cancellation_context)
-            refresh_ip(
+            return refresh_ip(
                 actions.deployed_app,
                 resource_config,
                 cancellation_manager,
