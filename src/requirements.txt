@@ -1,3 +1,3 @@
 cloudshell-shell-core~=5.0
 cloudshell-cp-core~=2.4
-cloudshell-cp-vcenter>=4.2.3,<5.0
+cloudshell-cp-vcenter>=4.2.5,<5.0
