@@ -150,7 +150,7 @@ jobs:
           fi
   create-gh-release:
     needs: [pre-commit, pack, download-linux-dependencies, download-windows-dependencies]
-    if: ${{ github.ref == 'refs/heads/master' && github.event_name == 'push' }}
+    if: ${{ github.ref == 'refs/heads/master-5.x.x' && github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -198,4 +198,4 @@ jobs:
           draft: true
           name: ${{ env.REPO }} ${{ env.TAG }}
           tag: ${{ env.TAG }}
-          commit: master
+          commit: master-5.x.x
