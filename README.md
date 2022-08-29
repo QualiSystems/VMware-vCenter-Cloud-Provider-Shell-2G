@@ -4,7 +4,7 @@
 
 Release date: February 2022
 
-`Shell version: 4.1.0`
+`Shell version: 4.2.0`
 
 `Document version: 2.0`
 
