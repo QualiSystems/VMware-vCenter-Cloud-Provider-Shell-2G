@@ -78,7 +78,7 @@ node_types:
       IP Regex:
         type: string
         description: "Filters the IP that can be selected as an App's address."
-        tags: []
+        tags: [user_input]
       Refresh IP Timeout:
         type: integer
         description: "Timeout for waiting when obtaining IP address (in seconds)"
@@ -194,7 +194,7 @@ node_types:
       IP Regex:
         type: string
         description: "Filters the IP that can be selected as an App's address."
-        tags: []
+        tags: [user_input]
       Refresh IP Timeout:
         type: integer
         description: "Timeout for waiting when obtaining IP address (in seconds)"
@@ -316,7 +316,7 @@ node_types:
       IP Regex:
         type: string
         description: "Filters the IP that can be selected as an App's address."
-        tags: []
+        tags: [user_input]
       Refresh IP Timeout:
         type: integer
         description: "Timeout for waiting when obtaining IP address (in seconds)"
@@ -443,7 +443,7 @@ node_types:
       IP Regex:
         type: string
         description: "Filters the IP that can be selected as an App's address."
-        tags: []
+        tags: [user_input]
       Refresh IP Timeout:
         type: integer
         description: "Timeout for waiting when obtaining IP address (in seconds)"
