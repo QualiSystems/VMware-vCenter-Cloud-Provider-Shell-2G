@@ -74,7 +74,7 @@ node_types:
         type: boolean
         description: "Enables the automatic execution of the Autoload command during reservation Setup."
         default: true
-        tags: []
+        tags: [ user_input ]
       IP Regex:
         type: string
         description: "Filters the IP that can be selected as an App's address."
@@ -190,7 +190,7 @@ node_types:
         type: boolean
         description: "Enables the automatic execution of the Autoload command during reservation Setup."
         default: true
-        tags: []
+        tags: [ user_input ]
       IP Regex:
         type: string
         description: "Filters the IP that can be selected as an App's address."
@@ -312,7 +312,7 @@ node_types:
         type: boolean
         description: "Enables the automatic execution of the Autoload command during reservation Setup."
         default: true
-        tags: []
+        tags: [ user_input ]
       IP Regex:
         type: string
         description: "Filters the IP that can be selected as an App's address."
@@ -439,7 +439,7 @@ node_types:
         type: boolean
         description: "Enables the automatic execution of the Autoload command during reservation Setup."
         default: true
-        tags: []
+        tags: [ user_input ]
       IP Regex:
         type: string
         description: "Filters the IP that can be selected as an App's address."
