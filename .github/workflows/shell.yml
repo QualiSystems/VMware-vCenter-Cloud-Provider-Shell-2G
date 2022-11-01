@@ -1,0 +1,10 @@
+name: Shell CI
+on:
+  push:
+    paths-ignore:
+      - README.md
+    branches-ignore:
+      - master
+jobs:
+  tox-ci:
+    uses: QualiSystems/.github/.github/workflows/shell-py-37-39.yml@master
