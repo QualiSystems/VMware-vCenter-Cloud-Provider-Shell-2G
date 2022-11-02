@@ -9,4 +9,4 @@ on:
       - master
 jobs:
   check-version:
-    uses: QualiSystems/.github/.github/workflows/shell-check-version.yml@shells-reusing-workflows
+    uses: QualiSystems/.github/.github/workflows/shell-check-version.yml@master
