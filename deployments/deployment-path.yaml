@@ -40,7 +40,7 @@ node_types:
         constraints:
           - valid_values: [ "Remain Powered On", "Power Off", "Inherited" ]
         default: "Inherited"
-        tags: []
+        tags: [ user_input ]
       VM Resource Pool:
         type: string
         description: "The vCenter Resource Pool in which the VM will be created. Should be under the defined V
@@ -156,7 +156,7 @@ node_types:
         constraints:
           - valid_values: [ "Remain Powered On", "Power Off", "Inherited" ]
         default: "Inherited"
-        tags: []
+        tags: [ user_input ]
       VM Resource Pool:
         type: string
         description: "The vCenter Resource Pool in which the VM will be created. Should be under the defined
@@ -278,7 +278,7 @@ node_types:
         constraints:
           - valid_values: ["Remain Powered On", "Power Off", "Inherited"]
         default: "Inherited"
-        tags: []
+        tags: [ user_input ]
       VM Resource Pool:
         type: string
         description: "The vCenter Resource Pool in which the VM will be created. Should be under the defined
@@ -405,7 +405,7 @@ node_types:
         constraints:
           - valid_values: [ "Remain Powered On", "Power Off", "Inherited" ]
         default: "Inherited"
-        tags: []
+        tags: [ user_input ]
       VM Resource Pool:
         type: string
         description: "The vCenter Resource Pool in which the VM will be created. Should be under the defined
