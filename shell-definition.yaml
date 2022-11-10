@@ -122,7 +122,7 @@ node_types:
       Promiscuous Mode:
         type: boolean
         description: "If enabled the port groups on the virtual switch will be configured to allow promiscuous mode."
-      Add Tags:
+      Enable Tags:
         type: boolean
         default: true
         description: "If enabled tags will be added to the new objects created by the 
