@@ -55,6 +55,14 @@
                     <Parameter Description="Override any prepared customization spec for the VM" DisplayName="Override Customization Spec" Name="override_custom_spec" Type="Lookup" AllowedValues="True,False"  DefaultValue="False" />
                 </Parameters>
             </Command>
+            <Command DisplayName="Get VMs Paths" Name="get_vms_paths" Tags="allow_unreserved" />
+            <Command DisplayName="Get Autoload Details for VM" Name="get_autoload_details_for_vm" Tags="allow_unreserved">
+                <Parameters>
+                    <Parameter DisplayName="VM path" Name="vm_path" Type="String" />
+                    <Parameter DisplayName="Model" Name="model" Type="String" />
+                    <Parameter DisplayName="Port model" Name="port_model" Type="String" />
+                </Parameters>
+            </Command>
         </Category>
         <Category Name="Power">
             <Command Description="" DisplayName="Power On" Name="PowerOn" Tags="power" />

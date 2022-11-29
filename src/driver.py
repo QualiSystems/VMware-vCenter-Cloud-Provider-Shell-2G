@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import json
 import time
+from contextlib import nullcontext
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
+import jsonpickle
 from cloudshell.cp.core.cancellation_manager import CancellationContextManager
+from cloudshell.cp.core.request_actions.models import VmDetailsData
 from cloudshell.cp.core.request_actions.save_restore_app import (
     SaveRestoreRequestActions,
 )
@@ -15,6 +20,7 @@ from cloudshell.shell.flows.connectivity.parse_request_service import (
     ParseConnectivityRequestService,
 )
 
+from cloudshell.cp.vcenter.actions.vm_details import VMDetailsActions
 from cloudshell.cp.vcenter.flows import (
     SnapshotFlow,
     VCenterAutoloadFlow,
@@ -31,8 +37,14 @@ from cloudshell.cp.vcenter.flows import (
 )
 from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlow
 from cloudshell.cp.vcenter.flows.customize_guest_os import customize_guest_os
+from cloudshell.cp.vcenter.flows.get_attribute_hints.attribute_hints import (
+    VcenterVMAttributeHint,
+)
 from cloudshell.cp.vcenter.flows.save_restore_app import SaveRestoreAppFlow
 from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
+from cloudshell.cp.vcenter.handlers.dc_handler import DcHandler
+from cloudshell.cp.vcenter.handlers.si_handler import SiHandler
+from cloudshell.cp.vcenter.handlers.vm_handler import VmHandler
 from cloudshell.cp.vcenter.models.connectivity_action_model import (
     VcenterConnectivityActionModel,
 )
@@ -56,8 +68,12 @@ from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
 
 if TYPE_CHECKING:
     from cloudshell.shell.core.driver_context import (
+        ApiVmCustomParam,
+        ApiVmDetails,
+        AutoLoadAttribute,
         AutoLoadCommandContext,
         AutoLoadDetails,
+        AutoLoadResource,
         CancellationContext,
         InitCommandContext,
         ResourceCommandContext,
@@ -508,3 +524,91 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 override_custom_spec,
                 logger,
             )
+
+    def get_vms_paths(self, context: ResourceCommandContext) -> str:
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Get VMs Paths command")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            si = SiHandler.from_config(resource_config, logger)
+            dc = DcHandler.get_dc(resource_config.default_datacenter, si)
+            hint_inst = VcenterVMAttributeHint(Mock(), dc)
+            vms_paths = hint_inst._get_hints()
+            return json.dumps(vms_paths)
+
+    def get_autoload_details_for_vm(
+        self,
+        context: ResourceCommandContext,
+        vm_path: str,
+        model: str,
+        port_model: str,
+    ) -> str:
+        class VmDetails(VMDetailsActions):
+            def _prepare_vm_network_data(self, vm, app_model):
+                app_model = None
+                return super()._prepare_vm_network_data(vm, app_model)
+
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Get Autoload Details For VM command")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            si = SiHandler.from_config(resource_config, logger)
+            dc = DcHandler.get_dc(resource_config.default_datacenter, si)
+            vm = dc.get_vm_by_path(vm_path)
+
+            deployed_app = StaticVCenterDeployedApp(attributes={"User": ""})
+            actions = VmDetails(si, resource_config, logger, nullcontext())
+            vm_details = actions.create(vm, deployed_app)
+
+            autoload_details = self._get_autoload_details(
+                vm,
+                model,
+                port_model,
+                vm_details,
+                resource_config,
+            )
+
+            return jsonpickle.encode(autoload_details)
+
+    def _get_autoload_details(
+        self,
+        vm: VmHandler,
+        model: str,
+        port_model: str,
+        vm_details: VmDetailsData,
+        resource_config: VCenterResourceConfig,
+    ) -> AutoLoadDetails:
+        resources = []
+
+        vm_custom_params = [
+            ApiVmCustomParam(data.key, data.value) for data in vm_details.vmInstanceData
+        ]
+        api_vm_details = ApiVmDetails(resource_config.name, vm.uuid, vm_custom_params)
+        attributes = [  # VM attributes
+            AutoLoadAttribute("", f"{model}.VM Name", vm.name),
+            AutoLoadAttribute(
+                "", f"{model}.Cloud Provider Resource Name", resource_config.name
+            ),
+            AutoLoadAttribute(
+                "", "VM Details", jsonpickle.encode(api_vm_details, unpicklable=False)
+            ),
+        ]
+
+        # ports resources and attributes
+        for vnic in vm.vnics:
+            vnic_num = vnic.label.split(" ", 1)[-1]
+            rel_path = f"P{vnic_num}"
+            res = AutoLoadResource(
+                name=f"Port{vnic_num}",
+                model=port_model,
+                relative_address=rel_path,
+            )
+            resources.append(res)
+            attributes.append(
+                AutoLoadAttribute(rel_path, "MAC Address", vnic.mac_address)
+            )
+            attributes.append(
+                AutoLoadAttribute(rel_path, "Requested vNIC Name", vnic_num)
+            )
+
+        return AutoLoadDetails(resources, attributes)
