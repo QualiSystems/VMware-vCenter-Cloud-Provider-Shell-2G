@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import time
 from contextlib import nullcontext
-from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import jsonpickle
@@ -13,14 +12,31 @@ from cloudshell.cp.core.request_actions.save_restore_app import (
     SaveRestoreRequestActions,
 )
 from cloudshell.cp.core.reservation_info import ReservationInfo
+from cloudshell.shell.core.driver_context import (
+    ApiVmCustomParam,
+    ApiVmDetails,
+    AutoLoadAttribute,
+    AutoLoadCommandContext,
+    AutoLoadDetails,
+    AutoLoadResource,
+    CancellationContext,
+    InitCommandContext,
+    ResourceCommandContext,
+    ResourceRemoteCommandContext,
+    UnreservedResourceCommandContext,
+)
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
 from cloudshell.shell.core.session.logging_session import LoggingSessionContext
 from cloudshell.shell.flows.connectivity.parse_request_service import (
     ParseConnectivityRequestService,
 )
+from pyVmomi import vim
 
 from cloudshell.cp.vcenter.actions.vm_details import VMDetailsActions
+from cloudshell.cp.vcenter.common.vcenter.data_retrieve_service import (
+    VcenterDataRetrieveService,
+)
 from cloudshell.cp.vcenter.flows import (
     SnapshotFlow,
     VCenterAutoloadFlow,
@@ -65,21 +81,6 @@ from cloudshell.cp.vcenter.models.deployed_app import (
     VMFromVMDeployedApp,
 )
 from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
-
-if TYPE_CHECKING:
-    from cloudshell.shell.core.driver_context import (
-        ApiVmCustomParam,
-        ApiVmDetails,
-        AutoLoadAttribute,
-        AutoLoadCommandContext,
-        AutoLoadDetails,
-        AutoLoadResource,
-        CancellationContext,
-        InitCommandContext,
-        ResourceCommandContext,
-        ResourceRemoteCommandContext,
-        UnreservedResourceCommandContext,
-    )
 
 
 class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
@@ -256,7 +257,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             cancellation_manager = CancellationContextManager(cancellation_context)
             actions = VCenterGetVMDetailsRequestActions.from_request(requests, api)
-            return VCenterGetVMDetailsFlow(
+            return StaticGetVmDetails(
                 resource_config, cancellation_manager, logger
             ).get_vm_details(actions)
 
@@ -525,16 +526,16 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 logger,
             )
 
-    def get_vms_paths(self, context: ResourceCommandContext) -> str:
+    def get_vms(self, context: ResourceCommandContext) -> str:
         with LoggingSessionContext(context) as logger:
             logger.info("Starting Get VMs Paths command")
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             si = SiHandler.from_config(resource_config, logger)
             dc = DcHandler.get_dc(resource_config.default_datacenter, si)
-            hint_inst = VcenterVMAttributeHint(Mock(), dc)
-            vms_paths = hint_inst._get_hints()
-            return json.dumps(vms_paths)
+            hint_inst = VmProperties(Mock(), dc)
+            vms = hint_inst.get_vms()
+            return json.dumps(vms)
 
     def get_autoload_details_for_vm(
         self,
@@ -584,19 +585,16 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             ApiVmCustomParam(data.key, data.value) for data in vm_details.vmInstanceData
         ]
         api_vm_details = ApiVmDetails(resource_config.name, vm.uuid, vm_custom_params)
-        attributes = [  # VM attributes
-            AutoLoadAttribute("", f"{model}.VM Name", vm.name),
+        attributes = [
+            AutoLoadAttribute("", f"{model}.OS Type", vm.guest_os),
             AutoLoadAttribute(
-                "", f"{model}.Cloud Provider Resource Name", resource_config.name
-            ),
-            AutoLoadAttribute(
-                "", "VM Details", jsonpickle.encode(api_vm_details, unpicklable=False)
+                "", "VmDetails", jsonpickle.encode(api_vm_details, unpicklable=False)
             ),
         ]
 
         # ports resources and attributes
         for vnic in vm.vnics:
-            vnic_num = vnic.label.split(" ", 1)[-1]
+            vnic_num = vnic.label.rsplit(" ", 1)[-1]
             rel_path = f"P{vnic_num}"
             res = AutoLoadResource(
                 name=f"Port{vnic_num}",
@@ -605,10 +603,86 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             )
             resources.append(res)
             attributes.append(
-                AutoLoadAttribute(rel_path, "MAC Address", vnic.mac_address)
+                AutoLoadAttribute(
+                    rel_path, f"{port_model}.MAC Address", vnic.mac_address
+                )
             )
             attributes.append(
-                AutoLoadAttribute(rel_path, "Requested vNIC Name", vnic_num)
+                AutoLoadAttribute(
+                    rel_path, f"{port_model}.Requested vNIC Name", vnic_num
+                )
             )
 
         return AutoLoadDetails(resources, attributes)
+
+
+class StaticGetVmDetails(VCenterGetVMDetailsFlow):
+    def _get_vm_details(self, deployed_app) -> VmDetailsData:
+        si = SiHandler.from_config(self._resource_conf, self._logger)
+        dc = DcHandler.get_dc(self._resource_conf.default_datacenter, si)
+        vm = dc.get_vm_by_uuid(deployed_app.vmdetails.uid)
+        return StaticVmDetailsActions(
+            si,
+            self._resource_conf,
+            self._logger,
+            self._cancellation_manager,
+        ).create(vm, deployed_app)
+
+
+class StaticVmDetailsActions(VMDetailsActions):
+    def _get_extra_instance_details(self, app_model):
+        if isinstance(app_model, (VMFromVMDeployApp, VMFromVMDeployedApp)):
+            res = self.prepare_vm_from_vm_details(app_model)
+        elif isinstance(
+            app_model, (VMFromTemplateDeployApp, VMFromTemplateDeployedApp)
+        ):
+            res = self.prepare_vm_from_template_details(app_model)
+        elif isinstance(
+            app_model, (VMFromLinkedCloneDeployApp, VMFromLinkedCloneDeployedApp)
+        ):
+            res = self.prepare_vm_from_clone_details(app_model)
+        elif isinstance(app_model, (VMFromImageDeployApp, VMFromImageDeployedApp)):
+            res = self.prepare_vm_from_image_details(app_model)
+        else:
+            res = self.prepare_static_vm_details(app_model)
+        return res
+
+
+class VmProperties(VcenterVMAttributeHint):
+    def get_vms(self) -> list[dict[str, str]]:
+        uuid_property_name = "config.uuid"  # todo BIOS UUID or Instance UUID
+        service = VcenterDataRetrieveService()
+        vms_with_props = service.get_all_objects_with_properties(
+            vim_type=vim.VirtualMachine,
+            properties=[
+                self.NAME_PROPERTY,
+                self.PARENT_PROPERTY,
+                self.IS_TEMPLATE_PROPERTY,
+                uuid_property_name,
+            ],
+            si=self._si,
+            root=self._datacenter,
+        )
+
+        folders_with_props = service.get_all_objects_with_properties(
+            vim_type=vim.Folder,
+            properties=[self.NAME_PROPERTY, self.PARENT_PROPERTY],
+            si=self._si,
+            root=self._datacenter,
+        )
+
+        folders_with_props_map = {prop.obj: prop for prop in folders_with_props}
+
+        vms = []
+        for vm_with_props in filter(self._filter_vm_by_template, vms_with_props):
+            vm_path = self._generate_full_vm_path(
+                vm_with_props=vm_with_props,
+                folders_with_props_map=folders_with_props_map,
+            )
+            vm_uuid = service.get_object_property(
+                name=uuid_property_name, obj_with_props=vm_with_props
+            )
+            vms.append({"path": vm_path, "uuid": vm_uuid})
+
+        vms.sort(key=lambda vm: vm["path"].lower())
+        return vms
