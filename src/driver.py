@@ -7,7 +7,11 @@ from unittest.mock import Mock
 
 import jsonpickle
 from cloudshell.cp.core.cancellation_manager import CancellationContextManager
-from cloudshell.cp.core.request_actions.models import VmDetailsData
+from cloudshell.cp.core.request_actions.models import (
+    VmDetailsData,
+    VmDetailsNetworkInterface,
+    VmDetailsProperty,
+)
 from cloudshell.cp.core.request_actions.save_restore_app import (
     SaveRestoreRequestActions,
 )
@@ -60,7 +64,7 @@ from cloudshell.cp.vcenter.flows.save_restore_app import SaveRestoreAppFlow
 from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
 from cloudshell.cp.vcenter.handlers.dc_handler import DcHandler
 from cloudshell.cp.vcenter.handlers.si_handler import SiHandler
-from cloudshell.cp.vcenter.handlers.vm_handler import VmHandler
+from cloudshell.cp.vcenter.handlers.vm_handler import PowerState, VmHandler
 from cloudshell.cp.vcenter.models.connectivity_action_model import (
     VcenterConnectivityActionModel,
 )
@@ -72,6 +76,7 @@ from cloudshell.cp.vcenter.models.deploy_app import (
     VMFromVMDeployApp,
 )
 from cloudshell.cp.vcenter.models.deployed_app import (
+    BaseVCenterDeployedApp,
     StaticVCenterDeployedApp,
     VCenterDeployedVMActions,
     VCenterGetVMDetailsRequestActions,
@@ -544,11 +549,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         model: str,
         port_model: str,
     ) -> str:
-        class VmDetails(VMDetailsActions):
-            def _prepare_vm_network_data(self, vm, app_model):
-                app_model = None
-                return super()._prepare_vm_network_data(vm, app_model)
-
         with LoggingSessionContext(context) as logger:
             logger.info("Starting Get Autoload Details For VM command")
             api = CloudShellSessionContext(context).get_api()
@@ -558,7 +558,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             vm = dc.get_vm_by_path(vm_path)
 
             deployed_app = StaticVCenterDeployedApp(attributes={"User": ""})
-            actions = VmDetails(si, resource_config, logger, nullcontext())
+            actions = StaticVmDetailsActions(si, resource_config, logger, nullcontext())
             vm_details = actions.create(vm, deployed_app)
 
             autoload_details = self._get_autoload_details(
@@ -593,8 +593,9 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         ]
 
         # ports resources and attributes
-        for vnic in vm.vnics:
-            vnic_num = vnic.label.rsplit(" ", 1)[-1]
+        for vnic_info in vm_details.vmNetworkData:
+            vnic_attrs = {prop.key: prop.value for prop in vnic_info.networkData}
+            vnic_num = vnic_attrs["Network Adapter"].rsplit(" ", 1)[-1]
             rel_path = f"P{vnic_num}"
             res = AutoLoadResource(
                 name=f"Port{vnic_num}",
@@ -604,12 +605,17 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resources.append(res)
             attributes.append(
                 AutoLoadAttribute(
-                    rel_path, f"{port_model}.MAC Address", vnic.mac_address
+                    rel_path, f"{port_model}.MAC Address", vnic_info.interfaceId
                 )
             )
             attributes.append(
                 AutoLoadAttribute(
                     rel_path, f"{port_model}.Requested vNIC Name", vnic_num
+                )
+            )
+            attributes.append(
+                AutoLoadAttribute(
+                    rel_path, f"{port_model}.Private IP", vnic_info.privateIpAddress
                 )
             )
 
@@ -647,10 +653,56 @@ class StaticVmDetailsActions(VMDetailsActions):
             res = self.prepare_static_vm_details(app_model)
         return res
 
+    def _prepare_vm_network_data(
+        self,
+        vm: VmHandler,
+        app_model,
+    ) -> list[VmDetailsNetworkInterface]:
+        """Prepare VM Network data."""
+        self._logger.info(f"Preparing VM Details network data for the {vm}")
+        network_interfaces = []
+
+        if getattr(app_model, "wait_for_ip", None) and vm.power_state is PowerState.ON:
+            primary_ip = self.get_vm_ip(vm._entity, ip_regex=app_model.ip_regex)
+        elif vm.power_state is PowerState.ON:
+            primary_ip = self.get_vm_ip(vm._entity)
+        else:
+            primary_ip = None
+
+        for vnic in vm.vnics:
+            network = vm.get_network_from_vnic(vnic)
+            is_predefined = network.name in self._resource_conf.reserved_networks
+            private_ip = self.get_vm_ip_from_vnic(vm._entity, vnic._device)
+            vlan_id = vm.get_network_vlan_id(network)
+
+            if not isinstance(app_model, BaseVCenterDeployedApp) or (
+                vlan_id and (self.is_quali_network(network.name) or is_predefined)
+            ):
+                is_primary = private_ip and primary_ip == private_ip
+
+                network_data = [
+                    VmDetailsProperty(key="IP", value=private_ip),
+                    VmDetailsProperty(key="MAC Address", value=vnic.mac_address),
+                    VmDetailsProperty(key="Network Adapter", value=vnic.label),
+                    VmDetailsProperty(key="Port Group Name", value=network.name),
+                ]
+
+                interface = VmDetailsNetworkInterface(
+                    interfaceId=vnic.mac_address,
+                    networkId=str(vlan_id),
+                    isPrimary=is_primary,
+                    isPredefined=is_predefined,
+                    networkData=network_data,
+                    privateIpAddress=private_ip,
+                )
+                network_interfaces.append(interface)
+
+        return network_interfaces
+
 
 class VmProperties(VcenterVMAttributeHint):
     def get_vms(self) -> list[dict[str, str]]:
-        uuid_property_name = "config.uuid"  # todo BIOS UUID or Instance UUID
+        uuid_property_name = "config.uuid"
         service = VcenterDataRetrieveService()
         vms_with_props = service.get_all_objects_with_properties(
             vim_type=vim.VirtualMachine,
