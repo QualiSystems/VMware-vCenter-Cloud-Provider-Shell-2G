@@ -679,7 +679,7 @@ class StaticVmDetailsActions(VMDetailsActions):
             if not isinstance(app_model, BaseVCenterDeployedApp) or (
                 vlan_id and (self.is_quali_network(network.name) or is_predefined)
             ):
-                is_primary = private_ip and primary_ip == private_ip
+                is_primary = bool(private_ip) and primary_ip == private_ip
 
                 network_data = [
                     VmDetailsProperty(key="IP", value=private_ip),
@@ -692,7 +692,7 @@ class StaticVmDetailsActions(VMDetailsActions):
                     interfaceId=vnic.mac_address,
                     networkId=str(vlan_id),
                     isPrimary=is_primary,
-                    isPredefined=is_predefined,
+                    isPredefined=True,
                     networkData=network_data,
                     privateIpAddress=private_ip,
                 )
