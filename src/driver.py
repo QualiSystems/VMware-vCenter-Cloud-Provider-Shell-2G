@@ -595,7 +595,8 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
         # ports resources and attributes
         for vnic_info in vm_details.vmNetworkData:
             vnic_attrs = {prop.key: prop.value for prop in vnic_info.networkData}
-            vnic_num = vnic_attrs["Network Adapter"].rsplit(" ", 1)[-1]
+            vnic_name = vnic_attrs["Network Adapter"]
+            vnic_num = vnic_name.rsplit(" ", 1)[-1]
             rel_path = f"P{vnic_num}"
             res = AutoLoadResource(
                 name=f"Port{vnic_num}",
@@ -610,7 +611,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             )
             attributes.append(
                 AutoLoadAttribute(
-                    rel_path, f"{port_model}.Requested vNIC Name", vnic_num
+                    rel_path, f"{port_model}.Requested vNIC Name", vnic_name
                 )
             )
             attributes.append(
