@@ -616,7 +616,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             )
             attributes.append(
                 AutoLoadAttribute(
-                    rel_path, f"{port_model}.Private IP", vnic_info.privateIpAddress
+                    rel_path, f"{port_model}.IP Address", vnic_info.privateIpAddress
                 )
             )
 
