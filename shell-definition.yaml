@@ -73,6 +73,9 @@ node_types:
           Forged Transmits:
             type: boolean
             default: true
+          MAC Address Changes:
+            type: boolean
+            default: false
           Enable Tags:
             type: boolean
             default: true
@@ -124,10 +127,16 @@ node_types:
         description: "Reserved networks separated by Semicolon(;), vNICs configured to those networks won't be used for VM connectivity."
       Promiscuous Mode:
         type: boolean
-        description: "If enabled the port groups on the virtual switch will be configured to allow promiscuous mode."
+        description: "If enabled the port groups on the virtual switch will be 
+        configured to allow promiscuous mode."
       Forged Transmits:
         type: boolean
-        description: "If enabled the port groups on the virtual switch will be configured to allow forged transmits."
+        description: "If enabled the port groups on the virtual switch will be
+         configured to allow forged transmits."
+      MAC Address Changes:
+        type: boolean
+        description: "If enabled the port groups on the virtual switch will be 
+        configured to allow MAC address changes."
       Enable Tags:
         type: boolean
         default: true
