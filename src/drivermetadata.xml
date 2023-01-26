@@ -55,6 +55,12 @@
                     <Parameter Description="Override any prepared customization spec for the VM" DisplayName="Override Customization Spec" Name="override_custom_spec" Type="Lookup" AllowedValues="True,False"  DefaultValue="False" />
                 </Parameters>
             </Command>
+            <Command Description="" DisplayName="Add VMs to an affinity rule" Name="add_vm_to_affinity_rule" Tags="allow_unreserved">
+                <Parameters>
+                    <Parameter Description="Path to VMs separated by ';' to add to the affinity rule" DisplayName="VM Paths" Name="vm_paths" Type="String" />
+                    <Parameter Description="Name of the existing affinity rule" DisplayName="Affinity Rule Name" Name="affinity_rule_name" Type="String" Mandatory="False" />
+                </Parameters>
+            </Command>
         </Category>
         <Category Name="Power">
             <Command Description="" DisplayName="Power On" Name="PowerOn" Tags="power" />

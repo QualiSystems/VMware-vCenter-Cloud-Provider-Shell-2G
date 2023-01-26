@@ -29,6 +29,7 @@ from cloudshell.cp.vcenter.flows import (
     refresh_ip,
     validate_attributes,
 )
+from cloudshell.cp.vcenter.flows.affinity_rules_flow import AffinityRulesFlow
 from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlow
 from cloudshell.cp.vcenter.flows.customize_guest_os import customize_guest_os
 from cloudshell.cp.vcenter.flows.save_restore_app import SaveRestoreAppFlow
@@ -508,3 +509,20 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 override_custom_spec,
                 logger,
             )
+
+    def add_vm_to_affinity_rule(
+        self,
+        context: ResourceCommandContext,
+        vm_paths: str,
+        affinity_rule_name: str | None,
+    ) -> str:
+        with LoggingSessionContext(context) as logger:
+            logger.info("Starting Add VMs to Affinity Rule command")
+            api = CloudShellSessionContext(context).get_api()
+            resource_config = VCenterResourceConfig.from_context(context, api=api)
+            reservation_info = ReservationInfo.from_resource_context(context)
+            flow = AffinityRulesFlow(
+                resource_config, reservation_info.reservation_id, logger
+            )
+            vm_paths = [path.strip() for path in vm_paths.split(";")]
+            return flow.add_vms_to_affinity_rule(vm_paths, affinity_rule_name)
