@@ -513,7 +513,7 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
     def add_vm_to_affinity_rule(
         self,
         context: ResourceCommandContext,
-        vm_paths: str,
+        vm_uuids: str,
         affinity_rule_name: str | None,
     ) -> str:
         with LoggingSessionContext(context) as logger:
@@ -524,5 +524,5 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             flow = AffinityRulesFlow(
                 resource_config, reservation_info.reservation_id, logger
             )
-            vm_paths = [path.strip() for path in vm_paths.split(";")]
-            return flow.add_vms_to_affinity_rule(vm_paths, affinity_rule_name)
+            vm_uuids = [path.strip() for path in vm_uuids.split(";")]
+            return flow.add_vms_to_affinity_rule(vm_uuids, affinity_rule_name)
