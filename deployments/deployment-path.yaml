@@ -124,6 +124,11 @@ node_types:
         would be the same as App name."
         default: true
         tags: []
+      Copy source UUID:
+        type: boolean
+        description: "If true the BIOS UUID of the source VM will be copied to the new VM."
+        default: false
+        tags: [user_input]
     artifacts:
       icon:
         file: shell-icon.png
@@ -240,6 +245,11 @@ node_types:
         would be the same as App name."
         default: true
         tags: []
+      Copy source UUID:
+        type: boolean
+        description: "If true the BIOS UUID of the source VM will be copied to the new VM."
+        default: false
+        tags: [ user_input ]
     artifacts:
       icon:
         file: shell-icon.png
@@ -362,6 +372,11 @@ node_types:
         would be the same as App name."
         default: true
         tags: []
+      Copy source UUID:
+        type: boolean
+        description: "If true the BIOS UUID of the source VM will be copied to the new VM."
+        default: false
+        tags: [ user_input ]
     artifacts:
       icon:
         file: shell-icon.png
