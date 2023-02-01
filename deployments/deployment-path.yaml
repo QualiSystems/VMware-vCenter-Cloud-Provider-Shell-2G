@@ -20,7 +20,7 @@ node_types:
         type: string
         description: "vCenter VM to use in the VM creation. Should include the full path
         and the vm name, for example QualiFolder/VM121"
-        tags: [user_input, editable_only_in_app_template]
+        tags: [user_input, editable_only_in_app_template, enable_hints]
       VM Cluster:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
@@ -124,6 +124,11 @@ node_types:
         would be the same as App name."
         default: true
         tags: []
+      Copy source UUID:
+        type: boolean
+        description: "If true the BIOS UUID of the source VM will be copied to the new VM."
+        default: false
+        tags: [user_input]
     artifacts:
       icon:
         file: shell-icon.png
@@ -136,7 +141,7 @@ node_types:
         type: string
         description: "vCenter VM template to use in the VM creation. Should include the full path and
         the template name, for example QualiFolder/Template1"
-        tags: [user_input, editable_only_in_app_template]
+        tags: [user_input, editable_only_in_app_template, enable_hints]
       VM Cluster:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
@@ -240,6 +245,11 @@ node_types:
         would be the same as App name."
         default: true
         tags: []
+      Copy source UUID:
+        type: boolean
+        description: "If true the BIOS UUID of the source VM will be copied to the new VM."
+        default: false
+        tags: [ user_input ]
     artifacts:
       icon:
         file: shell-icon.png
@@ -252,13 +262,13 @@ node_types:
         type: string
         description: "vCenter VM to use in the VM creation. Should include the full path
         and the vm name, for example QualiFolder/VM121"
-        tags: [user_input, editable_only_in_app_template]
+        tags: [user_input, editable_only_in_app_template, enable_hints]
       vCenter VM Snapshot:
         type: string
         description: "The snapshot that will be used to clone a new VM. This snapshot should be associated
         with the VM defined in the vCenter VM input. Should include the full path of the snapshot,
         for example Snapshot1/Snapshot2"
-        tags: [user_input, editable_only_in_app_template]
+        tags: [user_input, editable_only_in_app_template, enable_hints]
       VM Cluster:
         type: string
         description: "The vCenter cluster or host that will be used when deploying a VM.
@@ -362,6 +372,11 @@ node_types:
         would be the same as App name."
         default: true
         tags: []
+      Copy source UUID:
+        type: boolean
+        description: "If true the BIOS UUID of the source VM will be copied to the new VM."
+        default: false
+        tags: [ user_input ]
     artifacts:
       icon:
         file: shell-icon.png

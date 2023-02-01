@@ -9,7 +9,7 @@ on:
       - master
 jobs:
   shell-ci:
-    uses: QualiSystems/.github/.github/workflows/shell-py-37-39.yml@master
+    uses: QualiSystems/.github/.github/workflows/shell-py-39.yml@master
   github-release:
     needs: shell-ci
     uses: QualiSystems/.github/.github/workflows/shell-github-release.yml@master
