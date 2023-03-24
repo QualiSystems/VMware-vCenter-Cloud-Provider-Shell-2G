@@ -54,6 +54,7 @@ from cloudshell.cp.vcenter.models.deployed_app import (
     VMFromVMDeployedApp,
 )
 from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
+from cloudshell.cp.vcenter.utils.split_list_of_values import split_list_of_values
 
 if TYPE_CHECKING:
     from cloudshell.shell.core.driver_context import (
@@ -524,5 +525,5 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             flow = AffinityRulesFlow(
                 resource_config, reservation_info.reservation_id, logger
             )
-            vm_uuids = [path.strip() for path in vm_uuids.split(";")]
+            vm_uuids = list(split_list_of_values(vm_uuids))
             return flow.add_vms_to_affinity_rule(vm_uuids, affinity_rule_name)
