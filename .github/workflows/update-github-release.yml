@@ -1,20 +1,12 @@
 name: update release
-on:
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: 'Tag, branch or commit of the release'
-        required: false
-        default: ${{ github.ref }}
+on: workflow_dispatch
 jobs:
   shell-ci:
     uses: QualiSystems/.github/.github/workflows/shell-py-39.yml@master
     with:
       run-pre-commit: false
-      ref: ${{ inputs.ref }}
   github-release:
     needs: shell-ci
     uses: QualiSystems/.github/.github/workflows/shell-github-release.yml@master
     with:
       update: true
-      ref: ${{ inputs.ref }}
