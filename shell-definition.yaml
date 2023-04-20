@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 metadata:
   template_name: VMware vCenter Cloud Provider Shell 2G
   template_author: Quali
-  template_version: 6.0.1
+  template_version: 6.0.2
   template_icon: shell-icon.png
 
 description: >
@@ -127,14 +127,17 @@ node_types:
         description: "Reserved networks separated by Semicolon(;), vNICs configured to those networks won't be used for VM connectivity."
       Promiscuous Mode:
         type: boolean
+        default: true
         description: "If enabled the port groups on the virtual switch will be 
         configured to allow promiscuous mode."
       Forged Transmits:
         type: boolean
+        default: true
         description: "If enabled the port groups on the virtual switch will be
          configured to allow forged transmits."
       MAC Address Changes:
         type: boolean
+        default: false
         description: "If enabled the port groups on the virtual switch will be 
         configured to allow MAC address changes."
       Enable Tags:
