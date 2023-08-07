@@ -109,7 +109,6 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             logger.info("Starting Autoload command")
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
-
             autoload_flow = VCenterAutoloadFlow(resource_config)
             return autoload_flow.discover()
 
