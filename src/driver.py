@@ -14,6 +14,7 @@ from cloudshell.shell.core.session.logging_session import LoggingSessionContext
 from cloudshell.shell.flows.connectivity.parse_request_service import (
     ParseConnectivityRequestService,
 )
+from cloudshell.shell.standards.core.utils import split_list_of_values
 
 from cloudshell.cp.vcenter.flows import (
     SnapshotFlow,
@@ -54,7 +55,6 @@ from cloudshell.cp.vcenter.models.deployed_app import (
     VMFromVMDeployedApp,
 )
 from cloudshell.cp.vcenter.resource_config import VCenterResourceConfig
-from cloudshell.cp.vcenter.utils.split_list_of_values import split_list_of_values
 
 if TYPE_CHECKING:
     from cloudshell.shell.core.driver_context import (
