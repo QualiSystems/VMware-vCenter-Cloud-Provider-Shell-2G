@@ -264,7 +264,12 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            reservation_info = ReservationInfo.from_remote_resource_context(context)
+            try:
+                reservation_info = ReservationInfo.from_remote_resource_context(context)
+            except AttributeError:
+                # The sandbox in which the app is deployed failed and was removed.
+                # And the command was called not in the sandbox
+                reservation_info = None
             delete_instance(actions.deployed_app, resource_config, reservation_info)
 
     def SaveApp(
