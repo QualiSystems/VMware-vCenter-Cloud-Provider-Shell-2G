@@ -17,10 +17,10 @@ from cloudshell.shell.flows.connectivity.parse_request_service import (
 from cloudshell.shell.standards.core.utils import split_list_of_values
 
 from cloudshell.cp.vcenter.flows import (
+    DeleteFlow,
     SnapshotFlow,
     VCenterAutoloadFlow,
     VCenterPowerFlow,
-    delete_instance,
     get_cluster_usage,
     get_deploy_flow,
     get_hints,
@@ -35,6 +35,7 @@ from cloudshell.cp.vcenter.flows.connectivity_flow import VCenterConnectivityFlo
 from cloudshell.cp.vcenter.flows.customize_guest_os import customize_guest_os
 from cloudshell.cp.vcenter.flows.save_restore_app import SaveRestoreAppFlow
 from cloudshell.cp.vcenter.flows.vm_details import VCenterGetVMDetailsFlow
+from cloudshell.cp.vcenter.handlers.si_handler import SiHandler
 from cloudshell.cp.vcenter.models.connectivity_action_model import (
     VcenterConnectivityActionModel,
 )
@@ -109,8 +110,9 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             logger.info("Starting Autoload command")
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
-            autoload_flow = VCenterAutoloadFlow(resource_config)
-            return autoload_flow.discover()
+            with SiHandler.from_config(resource_config) as si:
+                autoload_flow = VCenterAutoloadFlow(si, resource_config)
+                return autoload_flow.discover()
 
     def Deploy(
         self,
@@ -135,13 +137,15 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
 
             request_actions = VCenterDeployVMRequestActions.from_request(request, api)
             deploy_flow_class = get_deploy_flow(request_actions)
-            deploy_flow = deploy_flow_class(
-                resource_config=resource_config,
-                reservation_info=reservation_info,
-                cs_api=api,
-                cancellation_manager=cancellation_manager,
-            )
-            return deploy_flow.deploy(request_actions=request_actions)
+            with SiHandler.from_config(resource_config) as si:
+                deploy_flow = deploy_flow_class(
+                    si=si,
+                    resource_config=resource_config,
+                    reservation_info=reservation_info,
+                    cs_api=api,
+                    cancellation_manager=cancellation_manager,
+                )
+                return deploy_flow.deploy(request_actions=request_actions)
 
     def PowerOn(self, context: ResourceRemoteCommandContext, ports: list[str]):
         """Called when reserving a sandbox during setup.
@@ -156,7 +160,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return VCenterPowerFlow(actions.deployed_app, resource_config).power_on()
+            with SiHandler.from_config(resource_config) as si:
+                return VCenterPowerFlow(
+                    si, actions.deployed_app, resource_config
+                ).power_on()
 
     def PowerOff(self, context: ResourceRemoteCommandContext, ports: list[str]):
         """Called during sandbox's teardown.
@@ -171,7 +178,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return VCenterPowerFlow(actions.deployed_app, resource_config).power_off()
+            with SiHandler.from_config(resource_config) as si:
+                return VCenterPowerFlow(
+                    si, actions.deployed_app, resource_config
+                ).power_off()
 
     def PowerCycle(
         self, context: ResourceRemoteCommandContext, ports: list[str], delay
@@ -182,10 +192,11 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            power_flow = VCenterPowerFlow(actions.deployed_app, resource_config)
-            power_flow.power_off()
-            time.sleep(float(delay))
-            power_flow.power_on()
+            with SiHandler.from_config(resource_config) as si:
+                power_flow = VCenterPowerFlow(si, actions.deployed_app, resource_config)
+                power_flow.power_off()
+                time.sleep(float(delay))
+                power_flow.power_on()
 
     def remote_refresh_ip(
         self,
@@ -208,9 +219,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
             cancellation_manager = CancellationContextManager(cancellation_context)
-            return refresh_ip(
-                actions.deployed_app, resource_config, cancellation_manager
-            )
+            with SiHandler.from_config(resource_config) as si:
+                return refresh_ip(
+                    si, actions.deployed_app, resource_config, cancellation_manager
+                )
 
     def GetVmDetails(
         self,
@@ -233,9 +245,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             cancellation_manager = CancellationContextManager(cancellation_context)
             actions = VCenterGetVMDetailsRequestActions.from_request(requests, api)
-            return VCenterGetVMDetailsFlow(
-                resource_config, cancellation_manager
-            ).get_vm_details(actions)
+            with SiHandler.from_config(resource_config) as si:
+                return VCenterGetVMDetailsFlow(
+                    si, resource_config, cancellation_manager
+                ).get_vm_details(actions)
 
     def ApplyConnectivityChanges(self, context: ResourceCommandContext, request: str):
         with LoggingSessionContext(context) as logger:
@@ -248,9 +261,13 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 is_multi_vlan_supported=True,
                 connectivity_model_cls=VcenterConnectivityActionModel,
             )
-            return VCenterConnectivityFlow(
-                parse_connectivity_req_service, resource_config, reservation_info
-            ).apply_connectivity(request)
+            with SiHandler.from_config(resource_config) as si:
+                return VCenterConnectivityFlow(
+                    parse_connectivity_req_service,
+                    si,
+                    resource_config,
+                    reservation_info,
+                ).apply_connectivity(request)
 
     def DeleteInstance(self, context: ResourceRemoteCommandContext, ports: list[str]):
         """Called when removing a deployed App from the sandbox.
@@ -270,7 +287,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
                 # The sandbox in which the app is deployed failed and was removed.
                 # And the command was called not in the sandbox
                 reservation_info = None
-            delete_instance(actions.deployed_app, resource_config, reservation_info)
+            with SiHandler.from_config(resource_config) as si:
+                DeleteFlow(
+                    si, actions.deployed_app, resource_config, reservation_info
+                ).delete()
 
     def SaveApp(
         self,
@@ -284,9 +304,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             cancellation_manager = CancellationContextManager(cancellation_context)
             actions = SaveRestoreRequestActions.from_request(request)
-            return SaveRestoreAppFlow(
-                resource_config, api, cancellation_manager
-            ).save_apps(actions.save_app_actions)
+            with SiHandler.from_config(resource_config) as si:
+                return SaveRestoreAppFlow(
+                    si, resource_config, api, cancellation_manager
+                ).save_apps(actions.save_app_actions)
 
     def DeleteSavedApps(
         self,
@@ -300,9 +321,10 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             cancellation_manager = CancellationContextManager(cancellation_context)
             actions = SaveRestoreRequestActions.from_request(request)
-            return SaveRestoreAppFlow(
-                resource_config, api, cancellation_manager
-            ).delete_saved_apps(actions.delete_saved_app_actions)
+            with SiHandler.from_config(resource_config) as si:
+                return SaveRestoreAppFlow(
+                    si, resource_config, api, cancellation_manager
+                ).delete_saved_apps(actions.delete_saved_app_actions)
 
     def remote_save_snapshot(
         self,
@@ -318,10 +340,12 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return SnapshotFlow(
-                resource_config,
-                actions.deployed_app,
-            ).save_snapshot(snapshot_name, save_memory)
+            with SiHandler.from_config(resource_config) as si:
+                return SnapshotFlow(
+                    si,
+                    resource_config,
+                    actions.deployed_app,
+                ).save_snapshot(snapshot_name, save_memory)
 
     def remote_restore_snapshot(
         self,
@@ -336,10 +360,12 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return SnapshotFlow(
-                resource_config,
-                actions.deployed_app,
-            ).restore_from_snapshot(api, snapshot_name)
+            with SiHandler.from_config(resource_config) as si:
+                return SnapshotFlow(
+                    si,
+                    resource_config,
+                    actions.deployed_app,
+                ).restore_from_snapshot(api, snapshot_name)
 
     def remote_get_snapshots(
         self, context: ResourceRemoteCommandContext, ports: list[str]
@@ -351,10 +377,12 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return SnapshotFlow(
-                resource_config,
-                actions.deployed_app,
-            ).get_snapshot_paths()
+            with SiHandler.from_config(resource_config) as si:
+                return SnapshotFlow(
+                    si,
+                    resource_config,
+                    actions.deployed_app,
+                ).get_snapshot_paths()
 
     def remote_remove_snapshot(
         self,
@@ -369,10 +397,12 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return SnapshotFlow(
-                resource_config,
-                actions.deployed_app,
-            ).remove_snapshot(snapshot_name, remove_child)
+            with SiHandler.from_config(resource_config) as si:
+                return SnapshotFlow(
+                    si,
+                    resource_config,
+                    actions.deployed_app,
+                ).remove_snapshot(snapshot_name, remove_child)
 
     def orchestration_save(
         self,
@@ -387,10 +417,12 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return SnapshotFlow(
-                resource_config,
-                actions.deployed_app,
-            ).orchestration_save()
+            with SiHandler.from_config(resource_config) as si:
+                return SnapshotFlow(
+                    si,
+                    resource_config,
+                    actions.deployed_app,
+                ).orchestration_save()
 
     def orchestration_restore(
         self,
@@ -404,17 +436,20 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return SnapshotFlow(
-                resource_config,
-                actions.deployed_app,
-            ).orchestration_restore(saved_details, api)
+            with SiHandler.from_config(resource_config) as si:
+                return SnapshotFlow(
+                    si,
+                    resource_config,
+                    actions.deployed_app,
+                ).orchestration_restore(saved_details, api)
 
     def get_vm_uuid(self, context: ResourceCommandContext, vm_name: str) -> str:
         with LoggingSessionContext(context) as logger:
             logger.info("Starting Get VM UUID command")
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
-            return get_vm_uuid_by_name(resource_config, vm_name)
+            with SiHandler.from_config(resource_config) as si:
+                return get_vm_uuid_by_name(si, resource_config, vm_name)
 
     def get_cluster_usage(
         self, context: ResourceCommandContext, datastore_name: str
@@ -423,7 +458,8 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             logger.info("Starting Get Cluster Usage command")
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
-            return get_cluster_usage(resource_config, datastore_name)
+            with SiHandler.from_config(resource_config) as si:
+                return get_cluster_usage(si, resource_config, datastore_name)
 
     def reconfigure_vm(
         self,
@@ -439,13 +475,15 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            reconfigure_vm(
-                resource_config,
-                actions.deployed_app,
-                cpu,
-                ram,
-                hdd,
-            )
+            with SiHandler.from_config(resource_config) as si:
+                reconfigure_vm(
+                    si,
+                    resource_config,
+                    actions.deployed_app,
+                    cpu,
+                    ram,
+                    hdd,
+                )
 
     def get_vm_web_console(
         self, context: ResourceRemoteCommandContext, ports: list[str]
@@ -456,21 +494,24 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return get_vm_web_console(resource_config, actions.deployed_app)
+            with SiHandler.from_config(resource_config) as si:
+                return get_vm_web_console(si, resource_config, actions.deployed_app)
 
     def get_attribute_hints(self, context: ResourceCommandContext, request: str) -> str:
         with LoggingSessionContext(context) as logger:
             logger.info("Starting Get attribute hints command")
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
-            return get_hints(resource_config, request)
+            with SiHandler.from_config(resource_config) as si:
+                return get_hints(si, resource_config, request)
 
     def validate_attributes(self, context: ResourceCommandContext, request: str) -> str:
         with LoggingSessionContext(context) as logger:
             logger.info("Starting Validate attributes command")
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
-            return validate_attributes(resource_config, request)
+            with SiHandler.from_config(resource_config) as si:
+                return validate_attributes(si, resource_config, request)
 
     def customize_guest_os(
         self,
@@ -486,13 +527,15 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             resource = context.remote_endpoints[0]
             actions = VCenterDeployedVMActions.from_remote_resource(resource, api)
-            return customize_guest_os(
-                resource_config,
-                actions.deployed_app,
-                custom_spec_name,
-                custom_spec_params,
-                override_custom_spec,
-            )
+            with SiHandler.from_config(resource_config) as si:
+                return customize_guest_os(
+                    si,
+                    resource_config,
+                    actions.deployed_app,
+                    custom_spec_name,
+                    custom_spec_params,
+                    override_custom_spec,
+                )
 
     def add_vm_to_affinity_rule(
         self,
@@ -505,6 +548,9 @@ class VMwarevCenterCloudProviderShell2GDriver(ResourceDriverInterface):
             api = CloudShellSessionContext(context).get_api()
             resource_config = VCenterResourceConfig.from_context(context, api=api)
             reservation_info = ReservationInfo.from_resource_context(context)
-            flow = AffinityRulesFlow(resource_config, reservation_info.reservation_id)
-            vm_uuids = list(split_list_of_values(vm_uuids))
-            return flow.add_vms_to_affinity_rule(vm_uuids, affinity_rule_name)
+            with SiHandler.from_config(resource_config) as si:
+                flow = AffinityRulesFlow(
+                    si, resource_config, reservation_info.reservation_id
+                )
+                vm_uuids = list(split_list_of_values(vm_uuids))
+                return flow.add_vms_to_affinity_rule(vm_uuids, affinity_rule_name)
